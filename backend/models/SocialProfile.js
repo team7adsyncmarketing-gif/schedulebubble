@@ -36,8 +36,8 @@ const socialProfileSchema = new mongoose.Schema(
   }
 );
 
-// Ensure a user can only have one profile per platform
-socialProfileSchema.index({ user: 1, platform: 1 }, { unique: true });
+// Ensure a user can only connect the exact same page/profile once per platform
+socialProfileSchema.index({ user: 1, platform: 1, profileId: 1 }, { unique: true });
 
 const SocialProfile = mongoose.model('SocialProfile', socialProfileSchema);
 

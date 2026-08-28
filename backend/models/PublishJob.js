@@ -12,6 +12,11 @@ const publishJobSchema = new mongoose.Schema(
       ref: 'Post',
       required: true,
     },
+    socialProfile: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'SocialProfile',
+      // Not required yet to maintain backwards compatibility with existing jobs
+    },
     platform: {
       type: String,
       required: true,

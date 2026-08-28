@@ -38,7 +38,13 @@ export const startPublisherService = () => {
 
             let profile = null;
             if (lookupPlatform !== 'telegram' && !isSandbox) {
-              profile = await SocialProfile.findOne({ user: job.user, platform: lookupPlatform });
+              if (job.socialProfile) {
+                profile = await SocialProfile.findById(job.socialProfile);
+              } else {
+                // Fallback for backwards compatibility with old jobs
+                profile = await SocialProfile.findOne({ user: job.user, platform: lookupPlatform });
+              }
+              
               if (!profile || !profile.accessToken) {
                 throw new Error(`No connected ${lookupPlatform} account found for this user.`);
               }

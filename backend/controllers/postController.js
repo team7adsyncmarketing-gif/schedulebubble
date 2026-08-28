@@ -6,49 +6,24 @@ import SocialProfile from '../models/SocialProfile.js';
 // @route   POST /api/posts
 // @access  Private
 export const createPost = async (req, res) => {
-  const { content, mediaUrls, platforms, scheduledFor, status, instagramFormat } = req.body;
+  const { content, mediaUrls, platforms, destinations, scheduledFor, status, instagramFormat } = req.body;
 
-  if (!content || !platforms || platforms.length === 0) {
-    return res.status(400).json({ message: 'Content and at least one platform are required' });
+  // destinations: [{ profileId?: string, platform: string }]
+  // If destinations is not provided, fall back to mapping 'platforms' (for backwards compatibility)
+  let finalDestinations = destinations || [];
+  if (finalDestinations.length === 0 && platforms && platforms.length > 0) {
+    finalDestinations = platforms.map(p => ({ platform: p }));
+  }
+
+  if (!content || finalDestinations.length === 0) {
+    return res.status(400).json({ message: 'Content and at least one destination are required' });
   }
 
   try {
-    // Map frontend platform names to database platform names
-    const dbPlatforms = platforms.map(p => {
-      if (p === 'facebook' || p === 'instagram') return 'meta';
-      if (p === 'twitter') return 'x';
-      return p;
-    });
-
-    const connectedProfiles = await SocialProfile.find({
-      user: req.user._id,
-      platform: { $in: dbPlatforms },
-    });
-
-    const connectedPlatformNames = connectedProfiles.map((p) => p.platform);
-    
-    // Map back to frontend names for validation check
-    const isConnected = (p) => {
-      if (p === 'telegram') return true; // Telegram uses .env credentials
-      if (p === 'facebook' || p === 'instagram') return connectedPlatformNames.includes('meta');
-      if (p === 'twitter') return connectedPlatformNames.includes('x');
-      return connectedPlatformNames.includes(p);
-    };
-    
     // 2. Determine initial status
     let initialStatus = status || 'scheduled';
     let finalScheduledFor = scheduledFor ? new Date(scheduledFor) : new Date();
-
-    // Check if there are any platforms requested that are not connected
-    const missingPlatforms = platforms.filter((p) => !isConnected(p));
-
-    // Bypass connection checks if it's just saving a draft or in sandbox mode
     const isSandbox = process.env.SANDBOX_MODE === 'true';
-    if (initialStatus !== 'draft' && !isSandbox && missingPlatforms.length > 0) {
-      return res.status(400).json({ 
-        message: `You must connect your accounts for: ${missingPlatforms.join(', ')} before posting.` 
-      });
-    }
 
     // If user clicked "Post Now" (status === 'published'), set job status to 'scheduled' for current time so publisherService picks it up immediately
     const jobStatus = initialStatus === 'published' ? 'scheduled' : initialStatus;
@@ -62,13 +37,14 @@ export const createPost = async (req, res) => {
       instagramFormat: instagramFormat || 'feed',
     });
 
-    // 4. Create isolated publish jobs for each platform
+    // 4. Create isolated publish jobs for each destination
     const jobs = await Promise.all(
-      platforms.map(async (platform) => {
+      finalDestinations.map(async (dest) => {
         return await PublishJob.create({
           user: req.user._id,
           post: post._id,
-          platform,
+          platform: dest.platform,
+          socialProfile: dest.profileId || null,
           status: jobStatus,
           scheduledFor: finalScheduledFor,
         });

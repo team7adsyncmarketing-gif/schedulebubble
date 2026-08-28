@@ -196,7 +196,58 @@ const LibraryModal: React.FC<{ isOpen: boolean; onClose: () => void; onSelect: (
 
 export const ContentComposer = () => {
   const [content, setContent] = useState('');
-  const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>([]);
+  const [selectedDestinations, setSelectedDestinations] = useState<{platform: string, profileId?: string}[]>([]);
+  const [connectedAccounts, setConnectedAccounts] = useState<any[]>([]);
+
+  React.useEffect(() => {
+    const fetchAccounts = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const res = await fetch('https://schedulebubble.onrender.com/api/oauth/connected', {
+          headers: token ? { 'Authorization': 'Bearer ' + token } : {},
+          credentials: 'include'
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setConnectedAccounts(data);
+        }
+      } catch (err) {
+        console.error('Failed to fetch connected accounts', err);
+      }
+    };
+    fetchAccounts();
+  }, []);
+
+  const availableDestinations = React.useMemo(() => {
+    const dests: any[] = [];
+    platforms.forEach(p => {
+      if (p.id === 'telegram') {
+        dests.push({ id: 'telegram', platform: 'telegram', name: 'Telegram', icon: p.icon, color: p.color });
+      } else {
+        const accounts = connectedAccounts.filter(acc => 
+          acc.platform === p.id || 
+          (p.id === 'facebook' && acc.platform === 'meta' && acc.profileName.includes('Facebook')) ||
+          (p.id === 'instagram' && acc.platform === 'meta' && acc.profileName.includes('Instagram')) ||
+          (p.id === 'twitter' && acc.platform === 'x')
+        );
+        
+        // Fallback for old meta profiles without specific FB/IG name
+        if (accounts.length === 0 && (p.id === 'facebook' || p.id === 'instagram')) {
+           const generic = connectedAccounts.filter(acc => acc.platform === 'meta');
+           generic.forEach(acc => {
+             if (!dests.find(d => d.profileId === acc._id)) {
+               dests.push({ id: acc._id, profileId: acc._id, platform: p.id, name: acc.profileName + ' (' + p.name + ')', icon: p.icon, color: p.color });
+             }
+           });
+        }
+
+        accounts.forEach(acc => {
+          dests.push({ id: acc._id, profileId: acc._id, platform: p.id, name: acc.profileName, icon: p.icon, color: p.color });
+        });
+      }
+    });
+    return dests;
+  }, [connectedAccounts]);
   const [media, setMedia] = useState<string | null>(null);
   const [scheduledFor, setScheduledFor] = useState('');
   const [isScheduling, setIsScheduling] = useState(false);
@@ -209,13 +260,15 @@ export const ContentComposer = () => {
 
   const maxLength = 280;
 
-  const togglePlatform = (platformId: string) => {
+  const toggleDestination = (dest: any) => {
     setError('');
-    setSelectedPlatforms(prev => 
-      prev.includes(platformId)
-        ? prev.filter(p => p !== platformId)
-        : [...prev, platformId]
-    );
+    setSelectedDestinations(prev => {
+      const exists = prev.find(d => d.id === dest.id || d.profileId === dest.profileId);
+      if (exists) {
+        return prev.filter(d => d.id !== dest.id && d.profileId !== dest.profileId);
+      }
+      return [...prev, { platform: dest.platform, profileId: dest.profileId, id: dest.id }];
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -227,7 +280,7 @@ export const ContentComposer = () => {
       setError('Post content cannot be empty.');
       return;
     }
-    if (selectedPlatforms.length === 0) {
+    if (selectedDestinations.length === 0) {
       setError('Please select at least one platform.');
       return;
     }
@@ -248,7 +301,7 @@ export const ContentComposer = () => {
         },
         body: JSON.stringify({
           content,
-          platforms: selectedPlatforms,
+          destinations: selectedDestinations,
           mediaUrls: media ? [media] : [],
           scheduledFor: isScheduling ? scheduledFor : undefined,
           status: isScheduling ? 'scheduled' : 'published',
@@ -264,7 +317,7 @@ export const ContentComposer = () => {
 
       setSuccess('Post successfully created!');
       setContent('');
-      setSelectedPlatforms([]);
+      setSelectedDestinations([]);
       setScheduledFor('');
       setIsScheduling(false);
       setMedia(null);
@@ -283,7 +336,7 @@ export const ContentComposer = () => {
       setError('Post content cannot be empty.');
       return;
     }
-    if (selectedPlatforms.length === 0) {
+    if (selectedDestinations.length === 0) {
       setError('Please select at least one platform for this draft.');
       return;
     }
@@ -300,7 +353,7 @@ export const ContentComposer = () => {
         },
         body: JSON.stringify({
           content,
-          platforms: selectedPlatforms,
+          destinations: selectedDestinations,
           mediaUrls: media ? [media] : [],
           status: 'draft',
         }),
@@ -315,7 +368,7 @@ export const ContentComposer = () => {
 
       setSuccess('Draft successfully saved!');
       setContent('');
-      setSelectedPlatforms([]);
+      setSelectedDestinations([]);
       setScheduledFor('');
       setIsScheduling(false);
       setMedia(null);
@@ -326,7 +379,7 @@ export const ContentComposer = () => {
     }
   };
 
-  const isInstagramMissingMedia = selectedPlatforms.includes('instagram') && !media;
+  const isInstagramMissingMedia = selectedDestinations.some(d => d.platform === 'instagram') && !media;
 
   return (
     <>
@@ -341,23 +394,23 @@ export const ContentComposer = () => {
             <div className="mb-6">
               <label className="block text-sm font-medium text-slate-500 dark:text-slate-400 mb-3">Publish to</label>
               <div className="flex flex-wrap gap-3">
-                {platforms.map(platform => {
-                  const isSelected = selectedPlatforms.includes(platform.id);
-                  const Icon = platform.icon;
+                {availableDestinations.map(dest => {
+                  const isSelected = selectedDestinations.some(d => d.id === dest.id || d.profileId === dest.profileId);
+                  const Icon = dest.icon;
                   return (
-                    <Magnetic key={platform.id}>
+                    <Magnetic key={dest.id || dest.platform}>
                       <button
                         type="button"
-                        onClick={() => togglePlatform(platform.id)}
+                        onClick={() => toggleDestination(dest)}
                         className={`flex items-center gap-2 px-5 py-2.5 rounded-xl border transition-all duration-200 hover:scale-[1.01] ${
                           isSelected 
                             ? 'bg-slate-700 border-indigo-500 shadow-[0_0_15px_rgba(99,102,241,0.2)]' 
                             : 'bg-slate-100 dark:bg-slate-900/50 border-slate-300 dark:border-slate-700 hover:border-slate-400 dark:hover:border-slate-500 hover:bg-slate-200 dark:hover:bg-slate-800'
                         }`}
                       >
-                        <Icon className={`w-4 h-4 ${isSelected ? platform.color : 'text-slate-400 dark:text-slate-400'}`} />
+                        <Icon className={`w-4 h-4 ${isSelected ? dest.color : 'text-slate-400 dark:text-slate-400'}`} />
                         <span className={`text-sm font-semibold ${isSelected ? 'text-white' : 'text-slate-500 dark:text-slate-400'}`}>
-                          {platform.name}
+                          {dest.name}
                         </span>
                       </button>
                     </Magnetic>
@@ -502,3 +555,4 @@ export const ContentComposer = () => {
 };
 
 export default ContentComposer;
+

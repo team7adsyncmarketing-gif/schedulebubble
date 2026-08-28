@@ -239,86 +239,116 @@ export const IntegrationsPanel = () => {
 
       <div className="space-y-4">
         {platforms.map((platform) => {
-          let connectedAccount = connectedAccounts.find(acc => acc.platform === platform.id);
+          let platformAccounts = connectedAccounts.filter(acc => acc.platform === platform.id);
           
           // Map backend platform strings ('meta', 'x') to frontend platform IDs
-          if (!connectedAccount) {
-            if (platform.id === 'facebook' || platform.id === 'instagram') {
-              connectedAccount = connectedAccounts.find(acc => acc.platform === 'meta');
+          if (platformAccounts.length === 0) {
+            if (platform.id === 'facebook') {
+              platformAccounts = connectedAccounts.filter(acc => acc.platform === 'meta' && acc.profileName.includes('Facebook'));
+            } else if (platform.id === 'instagram') {
+              platformAccounts = connectedAccounts.filter(acc => acc.platform === 'meta' && acc.profileName.includes('Instagram'));
             } else if (platform.id === 'twitter') {
-              connectedAccount = connectedAccounts.find(acc => acc.platform === 'x');
+              platformAccounts = connectedAccounts.filter(acc => acc.platform === 'x');
             }
           }
 
-          const isConnected = !!connectedAccount;
+          // If the platform is generic meta (no specific Facebook/Instagram tag), show all meta under both for safety, but with names
+          if (platformAccounts.length === 0 && (platform.id === 'facebook' || platform.id === 'instagram')) {
+              platformAccounts = connectedAccounts.filter(acc => acc.platform === 'meta');
+          }
+
+          const isConnected = platformAccounts.length > 0;
           const Icon = platform.icon;
 
           return (
             <div 
               key={platform.id} 
-              className="group flex flex-col sm:flex-row items-start sm:items-center justify-between p-5 rounded-2xl border border-slate-200 dark:border-slate-800/60 hover:border-slate-300 dark:hover:border-slate-700/80 transition-all duration-200 gap-4 sm:gap-0 hover:scale-[1.01] cursor-default bg-white/60 dark:bg-[rgba(15,20,35,0.5)]"
+              className="group flex flex-col p-5 rounded-2xl border border-slate-200 dark:border-slate-800/60 hover:border-slate-300 dark:hover:border-slate-700/80 transition-all duration-200 cursor-default bg-white/60 dark:bg-[rgba(15,20,35,0.5)]"
             >
-              <div className="flex items-center space-x-5">
-                <div className={`p-4 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 shadow-inner transition-colors duration-300 text-slate-500 dark:text-slate-400 ${platform.color}`}>
-                  <Icon className="w-7 h-7" />
-                </div>
-                <div>
-                  <h3 className="text-xl font-semibold text-slate-900 dark:text-white tracking-tight">{platform.name}</h3>
-                  <div className="flex items-center mt-1.5">
-                    <span className="relative flex h-2.5 w-2.5 mr-2.5">
-                      {isConnected && <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>}
-                      <span className={`relative inline-flex rounded-full h-2.5 w-2.5 ${isConnected ? 'bg-emerald-500' : 'bg-slate-400 dark:bg-slate-500'}`}></span>
-                    </span>
-                    <span className={`text-sm font-medium ${isConnected ? 'text-emerald-500 dark:text-emerald-400' : 'text-slate-400 dark:text-slate-400'}`}>
-                      {isConnected ? `Connected as ${connectedAccount.profileName}` : 'Not Connected'}
-                    </span>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="flex items-center space-x-5">
+                  <div className={`p-4 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 shadow-inner transition-colors duration-300 text-slate-500 dark:text-slate-400 ${platform.color}`}>
+                    <Icon className="w-7 h-7" />
                   </div>
+                  <div>
+                    <h3 className="text-xl font-semibold text-slate-900 dark:text-white tracking-tight">{platform.name}</h3>
+                    <div className="flex items-center mt-1.5">
+                      <span className="relative flex h-2.5 w-2.5 mr-2.5">
+                        {isConnected && <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>}
+                        <span className={`relative inline-flex rounded-full h-2.5 w-2.5 ${isConnected ? 'bg-emerald-500' : 'bg-slate-400 dark:bg-slate-500'}`}></span>
+                      </span>
+                      <span className={`text-sm font-medium ${isConnected ? 'text-emerald-500 dark:text-emerald-400' : 'text-slate-400 dark:text-slate-400'}`}>
+                        {isConnected ? `${platformAccounts.length} Connected Account${platformAccounts.length > 1 ? 's' : ''}` : 'Not Connected'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="w-full sm:w-auto flex flex-col sm:flex-row gap-2">
+                  <button
+                    onClick={() => handleConnect(platform.id)}
+                    className={`w-full sm:w-auto px-5 py-2.5 text-sm font-semibold rounded-xl transition-all duration-300 flex items-center justify-center gap-2 ${
+                      isConnected 
+                        ? 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700'
+                        : 'text-white bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 shadow-[0_0_15px_rgba(79,70,229,0.2)] hover:shadow-[0_0_25px_rgba(79,70,229,0.4)] hover:-translate-y-0.5'
+                    }`}
+                  >
+                    <Plus className="w-4 h-4" />
+                    {isConnected ? 'Add Another' : 'Connect Account'}
+                  </button>
+                  
+                  {!isConnected && (platform.id === 'facebook' || platform.id === 'instagram') && (
+                    <button
+                      onClick={() => setManualMetaModalOpen(true)}
+                      className="w-full sm:w-auto px-5 py-2.5 text-sm font-semibold text-indigo-400 hover:text-indigo-300 bg-indigo-500/10 hover:bg-indigo-500/20 active:bg-indigo-500/30 rounded-xl transition-all duration-300"
+                    >
+                      Connect Manually (Token)
+                    </button>
+                  )}
+                  {!isConnected && platform.id === 'twitter' && (
+                    <button
+                      onClick={() => setManualTwitterModalOpen(true)}
+                      className="w-full sm:w-auto px-5 py-2.5 text-sm font-semibold text-indigo-400 hover:text-indigo-300 bg-indigo-500/10 hover:bg-indigo-500/20 active:bg-indigo-500/30 rounded-xl transition-all duration-300"
+                    >
+                      Connect Manually (Token)
+                    </button>
+                  )}
+                  {!isConnected && platform.id === 'google' && (
+                    <button
+                      onClick={() => setManualGoogleModalOpen(true)}
+                      className="w-full sm:w-auto px-5 py-2.5 text-sm font-semibold text-indigo-400 hover:text-indigo-300 bg-indigo-500/10 hover:bg-indigo-500/20 active:bg-indigo-500/30 rounded-xl transition-all duration-300"
+                    >
+                      Connect Manually (Token)
+                    </button>
+                  )}
                 </div>
               </div>
 
-              <div className="w-full sm:w-auto">
-                {isConnected ? (
-                  <button
-                    onClick={() => handleDisconnect(connectedAccount._id)}
-                    className="w-full sm:w-auto px-5 py-2.5 text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-red-500 dark:hover:text-red-400 bg-slate-100 dark:bg-slate-900/50 hover:bg-red-50 dark:hover:bg-red-500/10 border border-slate-200 dark:border-slate-700 hover:border-red-400/40 dark:hover:border-red-500/30 rounded-xl transition-all duration-300"
-                  >
-                    Disconnect
-                  </button>
-                ) : (
-                  <div className="flex gap-2 w-full sm:w-auto flex-col sm:flex-row">
-                    <button
-                      onClick={() => handleConnect(platform.id)}
-                      className="w-full sm:w-auto px-5 py-2.5 text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 rounded-xl shadow-[0_0_15px_rgba(79,70,229,0.2)] hover:shadow-[0_0_25px_rgba(79,70,229,0.4)] hover:-translate-y-0.5 transition-all duration-300"
-                    >
-                      Connect Account
-                    </button>
-                    {(platform.id === 'facebook' || platform.id === 'instagram') && (
+              {/* List of Connected Accounts */}
+              {isConnected && (
+                <div className="mt-5 space-y-2 border-t border-slate-200 dark:border-slate-700/50 pt-4">
+                  {platformAccounts.map((account) => (
+                    <div key={account._id} className="flex items-center justify-between bg-slate-50 dark:bg-slate-800/30 p-3 rounded-xl border border-slate-100 dark:border-slate-700/30">
+                      <div className="flex items-center space-x-3">
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white ${platform.color.replace('text-', 'bg-').split(' ')[0]}`}>
+                           <Icon className="w-4 h-4" />
+                        </div>
+                        <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                          {account.profileName}
+                        </span>
+                      </div>
                       <button
-                        onClick={() => setManualMetaModalOpen(true)}
-                        className="w-full sm:w-auto px-5 py-2.5 text-sm font-semibold text-indigo-400 hover:text-indigo-300 bg-indigo-500/10 hover:bg-indigo-500/20 active:bg-indigo-500/30 rounded-xl transition-all duration-300"
+                        onClick={() => handleDisconnect(account._id)}
+                        className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-colors flex items-center gap-1 text-xs font-medium"
+                        title="Disconnect"
                       >
-                        Connect Manually (Token)
+                        <Unlink className="w-3.5 h-3.5" />
+                        Disconnect
                       </button>
-                    )}
-                    {platform.id === 'twitter' && (
-                      <button
-                        onClick={() => setManualTwitterModalOpen(true)}
-                        className="w-full sm:w-auto px-5 py-2.5 text-sm font-semibold text-indigo-400 hover:text-indigo-300 bg-indigo-500/10 hover:bg-indigo-500/20 active:bg-indigo-500/30 rounded-xl transition-all duration-300"
-                      >
-                        Connect Manually (Token)
-                      </button>
-                    )}
-                    {platform.id === 'google' && (
-                      <button
-                        onClick={() => setManualGoogleModalOpen(true)}
-                        className="w-full sm:w-auto px-5 py-2.5 text-sm font-semibold text-indigo-400 hover:text-indigo-300 bg-indigo-500/10 hover:bg-indigo-500/20 active:bg-indigo-500/30 rounded-xl transition-all duration-300"
-                      >
-                        Connect Manually (Token)
-                      </button>
-                    )}
-                  </div>
-                )}
-              </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           );
         })}

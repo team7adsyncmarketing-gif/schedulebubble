@@ -131,37 +131,46 @@ export const handleMetaCallback = async (req, res) => {
     let actualProfileName = fbData.name;
     let actualAccessToken = accessToken; // Default to user token
     
-    // If the user has pages, try to find one with an Instagram account linked
     const pages = fbData.accounts?.data || [];
+    const profilesToSave = [];
+
     if (pages.length > 0) {
-      const pageWithIg = pages.find(p => p.instagram_business_account);
-      if (pageWithIg) {
-        // Use the Instagram Business Account ID for publishing
-        actualProfileId = pageWithIg.instagram_business_account.id;
-        actualProfileName = `${fbData.name}'s Instagram`;
-        actualAccessToken = pageWithIg.access_token; // Use Page Access Token
-      } else {
-        // Fallback to the first Page ID
-        actualProfileId = pages[0].id;
-        actualProfileName = pages[0].name;
-        actualAccessToken = pages[0].access_token; // Use Page Access Token
+      for (const page of pages) {
+        // Save the Facebook Page
+        profilesToSave.push({
+          profileId: page.id,
+          profileName: `${page.name} (Facebook)`,
+          accessToken: page.access_token,
+        });
+
+        // Save the Instagram Business Account if it exists
+        if (page.instagram_business_account) {
+          profilesToSave.push({
+            profileId: page.instagram_business_account.id,
+            profileName: `${page.name} (Instagram)`,
+            accessToken: page.access_token,
+          });
+        }
       }
+    } else {
+      // Fallback to the main user profile if no pages exist
+      profilesToSave.push({
+        profileId: fbData.id,
+        profileName: fbData.name,
+        accessToken: accessToken,
+      });
     }
 
-    let profile = await SocialProfile.findOne({ user: session.userId, platform: 'meta' });
-    if (profile) {
-      profile.profileId = actualProfileId;
-      profile.profileName = actualProfileName;
-      profile.accessToken = actualAccessToken;
-      await profile.save();
-    } else {
-      await SocialProfile.create({
-        user: session.userId,
-        platform: 'meta',
-        profileId: actualProfileId,
-        profileName: actualProfileName,
-        accessToken: actualAccessToken,
-      });
+    // Upsert all found profiles for this user
+    for (const p of profilesToSave) {
+      await SocialProfile.findOneAndUpdate(
+        { user: session.userId, platform: 'meta', profileId: p.profileId },
+        {
+          profileName: p.profileName,
+          accessToken: p.accessToken,
+        },
+        { upsert: true, new: true }
+      );
     }
 
     delete oauthStateCache[state];
