@@ -1,0 +1,46 @@
+{
+  "name": "dm",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "lint": "oxlint",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@google/generative-ai": "^0.24.1",
+    "autoprefixer": "^10.5.4",
+    "axios": "^1.19.0",
+    "bcryptjs": "^3.0.3",
+    "cloudinary": "^2.10.1",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "form-data": "^4.0.6",
+    "framer-motion": "^13.1.1",
+    "jsonwebtoken": "^9.0.3",
+    "lucide-react": "^1.31.0",
+    "mongoose": "^9.9.2",
+    "multer": "^2.2.0",
+    "multer-storage-cloudinary": "^2.2.1",
+    "postcss": "^8.5.26",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "react-icons": "^5.7.0",
+    "recharts": "^3.10.1",
+    "tailwindcss": "^3.4.19",
+    "twitter-api-v2": "^1.29.1"
+  },
+  "devDependencies": {
+    "@types/node": "^24.13.3",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.4",
+    "oxlint": "^1.75.0",
+    "typescript": "~6.0.2",
+    "vite": "^8.2.0"
+  }
+}
