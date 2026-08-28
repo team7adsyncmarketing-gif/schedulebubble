@@ -10,22 +10,9 @@ function processDir(dir) {
     } else if (fullPath.endsWith('.ts') || fullPath.endsWith('.tsx') || fullPath.endsWith('.js')) {
       let content = fs.readFileSync(fullPath, 'utf8');
       
-      // We will replace all occurrences of http://localhost:5000 with a global variable or import.meta.env
-      // Since it's a vite app, we can use import.meta.env.VITE_API_URL
-      // The easiest robust way is just literal replacement:
       const before = content;
-      content = content.replace(/http:\/\/localhost:5000/g, '${import.meta.env.VITE_API_URL || "http://localhost:5000"}');
-      
-      // But if the original string was 'http://localhost:5000/api', replacing it makes it '${import.meta.env...}/api' inside single quotes.
-      // So let's fix single quotes to backticks if we injected ${...}
-      content = content.replace(/'([^']*\$\{import\.meta\.env\.VITE_API_URL \|\| "http:\/\/localhost:5000"\}[^']*)'/g, '`$1`');
-      
-      // And fix double quotes to backticks
-      content = content.replace(/"([^"]*\$\{import\.meta\.env\.VITE_API_URL \|\| "http:\/\/localhost:5000"\}[^"]*)"/g, '`$1`');
-      
-      // Wait, there's a problem: what if they had `http://localhost:5000${endpoint}` -> `${import...}${endpoint}`
-      // This is perfectly fine in backticks.
-      // But wait! What if they had `http://localhost:5000`? It becomes `${import...}`.
+      // Just safely swap the literal string
+      content = content.replace(/http:\/\/localhost:5000/g, 'https://schedulebubble.onrender.com');
 
       if (content !== before) {
         fs.writeFileSync(fullPath, content);
@@ -36,4 +23,4 @@ function processDir(dir) {
 }
 
 processDir(path.join(__dirname, 'src'));
-console.log('Done!');
+console.log('Safe replace Done!');

@@ -26,7 +26,7 @@ const AIWriterModal: React.FC<{ isOpen: boolean; onClose: () => void; onGenerate
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/ai/generate`, {
+      const response = await fetch('https://schedulebubble.onrender.com/api/ai/generate', {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
@@ -117,7 +117,7 @@ const AIWriterModal: React.FC<{ isOpen: boolean; onClose: () => void; onGenerate
             disabled={loading || !topic}
             className="w-full py-3 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-semibold rounded-xl shadow-[0_0_15px_rgba(79,70,229,0.3)] transition-all flex justify-center items-center gap-2 mt-4"
           >
-            {loading ? <Loader2 className="w-5 h-5 animate-spin` /> : 'Generate Content'}
+            {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Generate Content'}
           </button>
         </div>
       </div>
@@ -137,7 +137,7 @@ const LibraryModal: React.FC<{ isOpen: boolean; onClose: () => void; onSelect: (
       const headers: Record<string, string> = {};
       if (token) headers['Authorization'] = `Bearer ${token}`;
 
-      fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/media`, { 
+      fetch('https://schedulebubble.onrender.com/api/media', { 
         headers,
         credentials: 'include' 
       })
@@ -151,7 +151,7 @@ const LibraryModal: React.FC<{ isOpen: boolean; onClose: () => void; onSelect: (
   if (!isOpen) return null;
 
   return (
-    <div className=`fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
       <div className="bg-white dark:bg-[#0f172a] border border-slate-200 dark:border-slate-700/80 rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden p-6 relative flex flex-col max-h-[80vh]">
         <button onClick={onClose} className="absolute top-4 right-4 text-slate-400 hover:text-slate-700 dark:hover:text-white">
           <X className="w-5 h-5" />
@@ -183,7 +183,7 @@ const LibraryModal: React.FC<{ isOpen: boolean; onClose: () => void; onSelect: (
                   ) : (
                     <img src={asset.fileUrl} alt={asset.fileName} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
                   )}
-                  <div className="absolute inset-0 ring-2 ring-transparent group-hover:ring-indigo-500 transition-all rounded-xl` />
+                  <div className="absolute inset-0 ring-2 ring-transparent group-hover:ring-indigo-500 transition-all rounded-xl" />
                 </div>
               ))}
             </div>
@@ -240,7 +240,7 @@ export const ContentComposer = () => {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/posts`, {
+      const response = await fetch('https://schedulebubble.onrender.com/api/posts', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -292,7 +292,7 @@ export const ContentComposer = () => {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`${import.meta.env.VITE_API_URL || `http://localhost:5000"}/api/posts`, {
+      const response = await fetch('https://schedulebubble.onrender.com/api/posts', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -55,10 +55,10 @@ export default function Queues() {
       
       let endpoint = '/api/posts/queue';
       if (activeTab === 'drafts') endpoint = '/api/posts/drafts';
-      if (activeTab === 'published') endpoint = '/api/posts/published`;
+      if (activeTab === 'published') endpoint = '/api/posts/published';
 
-      const res = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000`}${endpoint}`, {
-        headers: { `Authorization': `Bearer ${token}` },
+      const res = await fetch(`https://schedulebubble.onrender.com${endpoint}`, {
+        headers: { 'Authorization': `Bearer ${token}` },
         credentials: 'include'
       });
       if (res.ok) {
@@ -78,9 +78,9 @@ export default function Queues() {
     if (!window.confirm('Are you sure you want to cancel this scheduled post?')) return;
     
     try {
-      const token = localStorage.getItem('token`);
-      const res = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/posts/queue/${id}`, {
-        method: `DELETE',
+      const token = localStorage.getItem('token');
+      const res = await fetch(`https://schedulebubble.onrender.com/api/posts/queue/${id}`, {
+        method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` },
         credentials: 'include'
       });
@@ -122,11 +122,11 @@ export default function Queues() {
       } else if (actionType === 'schedule') {
         newStatus = 'scheduled';
       } else {
-        newStatus = editDate ? 'scheduled` : newStatus;
+        newStatus = editDate ? 'scheduled' : newStatus;
       }
       
-      const res = await fetch(`${import.meta.env.VITE_API_URL || `http://localhost:5000"}/api/posts/queue/${editingJob._id}`, {
-        method: `PUT',
+      const res = await fetch(`https://schedulebubble.onrender.com/api/posts/queue/${editingJob._id}`, {
+        method: 'PUT',
         headers: { 
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}` 

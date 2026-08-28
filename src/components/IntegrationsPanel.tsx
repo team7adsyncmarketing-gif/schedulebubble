@@ -36,7 +36,7 @@ export const IntegrationsPanel = () => {
   const fetchAccounts = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000`}/api/oauth/accounts`, {
+      const response = await fetch('https://schedulebubble.onrender.com/api/oauth/accounts', {
         headers: token ? { 'Authorization': `Bearer ${token}` } : {},
         credentials: 'include',
       });
@@ -60,11 +60,11 @@ export const IntegrationsPanel = () => {
 
   const handleManualMetaConnect = async () => {
     if (!metaToken || !metaProfileId) return alert('Token and ID are required');
-    const token = localStorage.getItem('token`);
+    const token = localStorage.getItem('token');
     
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/oauth/meta-manual`, {
-        method: `POST',
+      const response = await fetch(`https://schedulebubble.onrender.com/api/oauth/meta-manual`, {
+        method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
           ...(token ? { 'Authorization': `Bearer ${token}` } : {})
@@ -88,10 +88,10 @@ export const IntegrationsPanel = () => {
 
   const handleManualTwitterConnect = async () => {
     if (!twitterToken) return alert('Token is required');
-    const token = localStorage.getItem('token`);
+    const token = localStorage.getItem('token');
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL || `http://localhost:5000`}/api/oauth/twitter-manual`, {
-        method: `POST',
+      const response = await fetch(`https://schedulebubble.onrender.com/api/oauth/twitter-manual`, {
+        method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
           ...(token ? { 'Authorization': `Bearer ${token}` } : {})
@@ -120,10 +120,10 @@ export const IntegrationsPanel = () => {
     const locId = googleLocationId.replace('locations/', '');
     const fullLocationId = `accounts/${accId}/locations/${locId}`;
 
-    const token = localStorage.getItem('token`);
+    const token = localStorage.getItem('token');
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/oauth/google-manual`, {
-        method: `POST',
+      const response = await fetch(`https://schedulebubble.onrender.com/api/oauth/google-manual`, {
+        method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
           ...(token ? { 'Authorization': `Bearer ${token}` } : {})
@@ -151,11 +151,11 @@ export const IntegrationsPanel = () => {
     
     if (platformId === 'telegram') {
       const botToken = prompt('Enter your Telegram Bot Token (leave blank to use backend .env):') || '';
-      const chatId = prompt('Enter your Telegram Chat ID (leave blank to use backend .env):') || '`;
+      const chatId = prompt('Enter your Telegram Chat ID (leave blank to use backend .env):') || '';
 
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL || `http://localhost:5000`}/api/oauth/telegram`, {
-          method: `POST',
+        const response = await fetch(`https://schedulebubble.onrender.com/api/oauth/telegram`, {
+          method: 'POST',
           headers: { 
             'Content-Type': 'application/json',
             ...(token ? { 'Authorization': `Bearer ${token}` } : {})
@@ -176,19 +176,19 @@ export const IntegrationsPanel = () => {
 
     // Redirect to real OAuth flow for X and Meta
     if (platformId === 'twitter') {
-      if (!token) return alert('Please log in first`);
-      window.location.href = `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/oauth/x?token=${token}`;
+      if (!token) return alert('Please log in first');
+      window.location.href = `https://schedulebubble.onrender.com/api/oauth/x?token=${token}`;
       return;
     }
-    if (platformId === `facebook' || platformId === 'instagram') {
-      if (!token) return alert('Please log in first`);
-      window.location.href = `${import.meta.env.VITE_API_URL || `http://localhost:5000`}/api/oauth/meta?token=${token}`;
+    if (platformId === 'facebook' || platformId === 'instagram') {
+      if (!token) return alert('Please log in first');
+      window.location.href = `https://schedulebubble.onrender.com/api/oauth/meta?token=${token}`;
       return;
     }
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/oauth/connect/${platformId}`, {
-        method: `POST',
+      const response = await fetch(`https://schedulebubble.onrender.com/api/oauth/connect/${platformId}`, {
+        method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
           ...(token ? { 'Authorization': `Bearer ${token}` } : {})
@@ -210,9 +210,9 @@ export const IntegrationsPanel = () => {
 
   const handleDisconnect = async (accountId: string) => {
     try {
-      const token = localStorage.getItem('token`);
-      const response = await fetch(`${import.meta.env.VITE_API_URL || `http://localhost:5000"}/api/oauth/disconnect/${accountId}`, {
-        method: `DELETE',
+      const token = localStorage.getItem('token');
+      const response = await fetch(`https://schedulebubble.onrender.com/api/oauth/disconnect/${accountId}`, {
+        method: 'DELETE',
         headers: token ? { 'Authorization': `Bearer ${token}` } : {},
         credentials: 'include',
       });

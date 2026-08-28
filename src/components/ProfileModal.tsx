@@ -37,7 +37,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, use
   const fetchAccounts = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000`}/api/oauth/accounts`, {
+      const response = await fetch('https://schedulebubble.onrender.com/api/oauth/accounts', {
         headers: token ? { 'Authorization': `Bearer ${token}` } : {},
         credentials: 'include',
       });
@@ -61,7 +61,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, use
     formData.append('image', file);
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/users/profile-picture`, {
+      const response = await fetch('https://schedulebubble.onrender.com/api/users/profile-picture', {
         method: 'PUT',
         headers: { 'Authorization': `Bearer ${token}` },
         body: formData
@@ -83,7 +83,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose, use
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`${import.meta.env.VITE_API_URL || `http://localhost:5000"}/api/auth/update-profile`, {
+      const response = await fetch('https://schedulebubble.onrender.com/api/auth/update-profile', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
