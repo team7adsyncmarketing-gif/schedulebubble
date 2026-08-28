@@ -32,7 +32,7 @@ const StatCard: React.FC<StatCardProps> = ({ icon, iconBg, label, value, glowCol
       </div>
       <div>
         <p className="text-slate-500 dark:text-slate-400 text-xs font-semibold tracking-widest uppercase">{label}</p>
-        <p className="text-3xl font-extrabold text-slate-900 dark:text-white mt-1 tracking-tight">{value}</p>
+        <p className="text-3xl font-extrabold text-slate-900 dark:text-white mt-1 tracking-tight`>{value}</p>
       </div>
     </div>
   </div>
@@ -46,7 +46,7 @@ export const AnalyticsDashboard = () => {
     const fetchAnalytics = async () => {
       try {
         const token = localStorage.getItem('token');
-        const response = await fetch('http://localhost:5000/api/analytics/summary', {
+        const response = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/analytics/summary`, {
           headers: token ? { 'Authorization': `Bearer ${token}` } : {},
           credentials: 'include',
         });
@@ -65,7 +65,7 @@ export const AnalyticsDashboard = () => {
 
   if (loading) {
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
+      <div className=`grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
         {[...Array(4)].map((_, i) => (
           <div key={i} className="h-28 rounded-3xl bg-slate-200 dark:bg-slate-800/40 animate-pulse border border-slate-300 dark:border-slate-800/60" />
         ))}

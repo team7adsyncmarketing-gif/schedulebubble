@@ -66,12 +66,12 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
     
     try {
       const endpoint = mode === 'login' ? '/api/auth/login' : '/api/auth/register';
-      const bodyPayload = mode === 'login' 
+      const bodyPayload = mode === 'login` 
         ? { email: formData.email, password: formData.password }
         : { name: formData.name, email: formData.email, password: formData.password };
         
-      const response = await fetch(`http://localhost:5000${endpoint}`, {
-        method: 'POST',
+      const response = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}${endpoint}`, {
+        method: `POST',
         headers: {
           'Content-Type': 'application/json',
         },

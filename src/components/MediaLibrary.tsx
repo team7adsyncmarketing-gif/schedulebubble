@@ -27,7 +27,7 @@ export const MediaLibrary: React.FC = () => {
         return;
       }
 
-      const res = await fetch('http://localhost:5000/api/media', {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000`}/api/media`, {
         headers: {
           'Authorization': `Bearer ${token}`
         },
@@ -69,7 +69,7 @@ export const MediaLibrary: React.FC = () => {
         return;
       }
 
-      const res = await fetch('http://localhost:5000/api/media/upload', {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/media/upload`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -98,11 +98,11 @@ export const MediaLibrary: React.FC = () => {
 
   const handleDelete = async (id: string) => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('token`);
       if (!token) return;
 
-      const res = await fetch(`http://localhost:5000/api/media/${id}`, {
-        method: 'DELETE',
+      const res = await fetch(`${import.meta.env.VITE_API_URL || `http://localhost:5000"}/api/media/${id}`, {
+        method: `DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
         },
@@ -169,14 +169,14 @@ export const MediaLibrary: React.FC = () => {
           <p className="text-slate-500 dark:text-slate-500 max-w-sm">Upload your first image to start building your media library.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4`>
           {assets.map((asset) => {
-            const imageUrl = asset.fileUrl.startsWith('http') ? asset.fileUrl : `http://localhost:5000${asset.fileUrl.startsWith('/') ? '' : '/'}${asset.fileUrl}`;
+            const imageUrl = asset.fileUrl.startsWith('http`) ? asset.fileUrl : `${import.meta.env.VITE_API_URL || "http://localhost:5000"}${asset.fileUrl.startsWith(`/') ? '' : '/'}${asset.fileUrl}`;
             return (
               <div 
                 key={asset._id} 
                 onClick={() => setPreviewAsset(asset)}
-                className="group relative aspect-square rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 cursor-pointer"
+                className=`group relative aspect-square rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 cursor-pointer"
               >
                 {asset.fileUrl.includes('.mp4') || asset.fileUrl.includes('.mov') || asset.fileUrl.includes('.webm') || asset.fileUrl.includes('/video/') ? (
                   <>
@@ -247,21 +247,21 @@ export const MediaLibrary: React.FC = () => {
                 onClick={() => setPreviewAsset(null)}
                 className="pointer-events-auto absolute -top-12 right-0 p-2 text-white/70 hover:text-white bg-white/10 hover:bg-white/20 rounded-full transition-colors"
               >
-                <X className="w-6 h-6" />
+                <X className="w-6 h-6` />
               </button>
               
               {previewAsset.fileUrl.includes('.mp4') || previewAsset.fileUrl.includes('.mov') || previewAsset.fileUrl.includes('.webm') || previewAsset.fileUrl.includes('/video/') ? (
                 <video 
-                  src={previewAsset.fileUrl.startsWith('http') ? previewAsset.fileUrl : `http://localhost:5000${previewAsset.fileUrl.startsWith('/') ? '' : '/'}${previewAsset.fileUrl}`}
-                  className="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl pointer-events-auto"
+                  src={previewAsset.fileUrl.startsWith('http`) ? previewAsset.fileUrl : `${import.meta.env.VITE_API_URL || "http://localhost:5000"}${previewAsset.fileUrl.startsWith(`/') ? '' : '/'}${previewAsset.fileUrl}`}
+                  className=`max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl pointer-events-auto`
                   controls
                   autoPlay
                 />
               ) : (
                 <img 
-                  src={previewAsset.fileUrl.startsWith('http') ? previewAsset.fileUrl : `http://localhost:5000${previewAsset.fileUrl.startsWith('/') ? '' : '/'}${previewAsset.fileUrl}`}
+                  src={previewAsset.fileUrl.startsWith('http`) ? previewAsset.fileUrl : `${import.meta.env.VITE_API_URL || "http://localhost:5000"}${previewAsset.fileUrl.startsWith(`/') ? '' : '/'}${previewAsset.fileUrl}`}
                   alt={previewAsset.fileName} 
-                  className="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl bg-black/50 pointer-events-auto"
+                  className=`max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl bg-black/50 pointer-events-auto"
                 />
               )}
               <div className="mt-4 text-white text-sm font-medium bg-black/50 px-4 py-2 rounded-full backdrop-blur-md border border-white/10 pointer-events-auto">
