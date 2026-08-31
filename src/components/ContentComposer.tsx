@@ -259,9 +259,9 @@ export const ContentComposer = () => {
   const toggleDestination = (dest: any) => {
     setError('');
     setSelectedDestinations(prev => {
-      const exists = prev.find(d => d.id === dest.id || d.profileId === dest.profileId);
+      const exists = prev.find(d => d.id === dest.id);
       if (exists) {
-        return prev.filter(d => d.id !== dest.id && d.profileId !== dest.profileId);
+        return prev.filter(d => d.id !== dest.id);
       }
       return [...prev, { platform: dest.platform, profileId: dest.profileId, id: dest.id }];
     });
@@ -391,7 +391,7 @@ export const ContentComposer = () => {
               <label className="block text-sm font-medium text-slate-500 dark:text-slate-400 mb-3">Publish to</label>
               <div className="flex flex-wrap gap-3">
                 {availableDestinations.map(dest => {
-                  const isSelected = selectedDestinations.some(d => d.id === dest.id || d.profileId === dest.profileId);
+                  const isSelected = selectedDestinations.some(d => d.id === dest.id);
                   const Icon = dest.icon;
                   return (
                     <Magnetic key={dest.id || dest.platform}>
