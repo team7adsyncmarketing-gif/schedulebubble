@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Plus, Unlink } from 'lucide-react';
 import { FaXTwitter, FaLinkedin, FaFacebook, FaInstagram, FaGoogle, FaTelegram } from 'react-icons/fa6';
 
 interface ConnectedAccount {
