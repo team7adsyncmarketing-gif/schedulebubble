@@ -25,7 +25,7 @@ export default function Analytics() {
       try {
         const token = localStorage.getItem('token');
         if (!token) return;
-        const res = await fetch('https://schedulebubble.onrender.com/api/analytics/dashboard', {
+        const res = await fetch('https://schedulebubble-zjof.onrender.com/api/analytics/dashboard', {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         if (res.ok) {

@@ -37,7 +37,7 @@ export const IntegrationsPanel = () => {
   const fetchAccounts = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('https://schedulebubble.onrender.com/api/oauth/accounts', {
+      const response = await fetch('https://schedulebubble-zjof.onrender.com/api/oauth/accounts', {
         headers: token ? { 'Authorization': `Bearer ${token}` } : {},
         credentials: 'include',
       });
@@ -64,7 +64,7 @@ export const IntegrationsPanel = () => {
     const token = localStorage.getItem('token');
     
     try {
-      const response = await fetch(`https://schedulebubble.onrender.com/api/oauth/meta-manual`, {
+      const response = await fetch(`https://schedulebubble-zjof.onrender.com/api/oauth/meta-manual`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
@@ -91,7 +91,7 @@ export const IntegrationsPanel = () => {
     if (!twitterToken) return alert('Token is required');
     const token = localStorage.getItem('token');
     try {
-      const response = await fetch(`https://schedulebubble.onrender.com/api/oauth/twitter-manual`, {
+      const response = await fetch(`https://schedulebubble-zjof.onrender.com/api/oauth/twitter-manual`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
@@ -123,7 +123,7 @@ export const IntegrationsPanel = () => {
 
     const token = localStorage.getItem('token');
     try {
-      const response = await fetch(`https://schedulebubble.onrender.com/api/oauth/google-manual`, {
+      const response = await fetch(`https://schedulebubble-zjof.onrender.com/api/oauth/google-manual`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
@@ -155,7 +155,7 @@ export const IntegrationsPanel = () => {
       const chatId = prompt('Enter your Telegram Chat ID (leave blank to use backend .env):') || '';
 
       try {
-        const response = await fetch(`https://schedulebubble.onrender.com/api/oauth/telegram`, {
+        const response = await fetch(`https://schedulebubble-zjof.onrender.com/api/oauth/telegram`, {
           method: 'POST',
           headers: { 
             'Content-Type': 'application/json',
@@ -178,17 +178,17 @@ export const IntegrationsPanel = () => {
     // Redirect to real OAuth flow for X and Meta
     if (platformId === 'twitter') {
       if (!token) return alert('Please log in first');
-      window.location.href = `https://schedulebubble.onrender.com/api/oauth/x?token=${token}`;
+      window.location.href = `https://schedulebubble-zjof.onrender.com/api/oauth/x?token=${token}`;
       return;
     }
     if (platformId === 'facebook' || platformId === 'instagram') {
       if (!token) return alert('Please log in first');
-      window.location.href = `https://schedulebubble.onrender.com/api/oauth/meta?token=${token}`;
+      window.location.href = `https://schedulebubble-zjof.onrender.com/api/oauth/meta?token=${token}`;
       return;
     }
 
     try {
-      const response = await fetch(`https://schedulebubble.onrender.com/api/oauth/connect/${platformId}`, {
+      const response = await fetch(`https://schedulebubble-zjof.onrender.com/api/oauth/connect/${platformId}`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
@@ -212,7 +212,7 @@ export const IntegrationsPanel = () => {
   const handleDisconnect = async (accountId: string) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`https://schedulebubble.onrender.com/api/oauth/disconnect/${accountId}`, {
+      const response = await fetch(`https://schedulebubble-zjof.onrender.com/api/oauth/disconnect/${accountId}`, {
         method: 'DELETE',
         headers: token ? { 'Authorization': `Bearer ${token}` } : {},
         credentials: 'include',

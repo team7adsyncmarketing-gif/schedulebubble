@@ -46,7 +46,7 @@ export const AnalyticsDashboard = () => {
     const fetchAnalytics = async () => {
       try {
         const token = localStorage.getItem('token');
-        const response = await fetch('https://schedulebubble.onrender.com/api/analytics/summary', {
+        const response = await fetch('https://schedulebubble-zjof.onrender.com/api/analytics/summary', {
           headers: token ? { 'Authorization': `Bearer ${token}` } : {},
           credentials: 'include',
         });

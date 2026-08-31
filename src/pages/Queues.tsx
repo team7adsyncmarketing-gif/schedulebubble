@@ -57,7 +57,7 @@ export default function Queues() {
       if (activeTab === 'drafts') endpoint = '/api/posts/drafts';
       if (activeTab === 'published') endpoint = '/api/posts/published';
 
-      const res = await fetch(`https://schedulebubble.onrender.com${endpoint}`, {
+      const res = await fetch(`https://schedulebubble-zjof.onrender.com${endpoint}`, {
         headers: { 'Authorization': `Bearer ${token}` },
         credentials: 'include'
       });
@@ -79,7 +79,7 @@ export default function Queues() {
     
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch(`https://schedulebubble.onrender.com/api/posts/queue/${id}`, {
+      const res = await fetch(`https://schedulebubble-zjof.onrender.com/api/posts/queue/${id}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` },
         credentials: 'include'
@@ -125,7 +125,7 @@ export default function Queues() {
         newStatus = editDate ? 'scheduled' : newStatus;
       }
       
-      const res = await fetch(`https://schedulebubble.onrender.com/api/posts/queue/${editingJob._id}`, {
+      const res = await fetch(`https://schedulebubble-zjof.onrender.com/api/posts/queue/${editingJob._id}`, {
         method: 'PUT',
         headers: { 
           'Content-Type': 'application/json',

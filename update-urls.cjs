@@ -12,7 +12,7 @@ function processDir(dir) {
       
       const before = content;
       // Just safely swap the literal string
-      content = content.replace(/http:\/\/localhost:5000/g, 'https://schedulebubble.onrender.com');
+      content = content.replace(/https:\/\/schedulebubble\.onrender\.com/g, 'https://schedulebubble-zjof.onrender.com');
 
       if (content !== before) {
         fs.writeFileSync(fullPath, content);
