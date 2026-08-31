@@ -5,12 +5,12 @@ import { Magnetic } from './ui/Magnetic';
 
 // Strict Platform Order: Instagram, Facebook, Google Business Profile (GMB), LinkedIn, X (Twitter), Telegram
 const platforms = [
-  { id: 'telegram', name: 'Telegram', icon: FaTelegram, color: 'text-[#229ED9]' },
-  { id: 'instagram', name: 'Instagram', icon: FaInstagram, color: 'text-[#E4405F]' },
-  { id: 'facebook', name: 'Facebook', icon: FaFacebook, color: 'text-[#1877F2]' },
-  { id: 'gmb', name: 'Google', icon: FaGoogle, color: 'text-[#4285F4]' },
-  { id: 'linkedin', name: 'LinkedIn', icon: FaLinkedin, color: 'text-[#0A66C2]' },
-  { id: 'twitter', name: 'X', icon: FaXTwitter, color: 'text-white' },
+  { id: 'telegram', name: 'Telegram', icon: FaTelegram, color: 'text-[#229ED9]', hoverColor: 'group-hover:text-[#229ED9] group-hover:drop-shadow-[0_0_8px_rgba(34,158,217,0.5)]' },
+  { id: 'instagram', name: 'Instagram', icon: FaInstagram, color: 'text-[#E4405F]', hoverColor: 'group-hover:text-[#E4405F] group-hover:drop-shadow-[0_0_8px_rgba(228,64,95,0.5)]' },
+  { id: 'facebook', name: 'Facebook', icon: FaFacebook, color: 'text-[#1877F2]', hoverColor: 'group-hover:text-[#1877F2] group-hover:drop-shadow-[0_0_8px_rgba(24,119,242,0.5)]' },
+  { id: 'gmb', name: 'Google', icon: FaGoogle, color: 'text-[#4285F4]', hoverColor: 'group-hover:text-[#4285F4] group-hover:drop-shadow-[0_0_8px_rgba(66,133,244,0.5)]' },
+  { id: 'linkedin', name: 'LinkedIn', icon: FaLinkedin, color: 'text-[#0A66C2]', hoverColor: 'group-hover:text-[#0A66C2] group-hover:drop-shadow-[0_0_8px_rgba(10,102,194,0.5)]' },
+  { id: 'twitter', name: 'X', icon: FaXTwitter, color: 'text-white', hoverColor: 'group-hover:text-black dark:group-hover:text-white group-hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]' },
 ];
 
 const AIWriterModal: React.FC<{ isOpen: boolean; onClose: () => void; onGenerate: (text: string) => void }> = ({ isOpen, onClose, onGenerate }) => {
@@ -219,35 +219,30 @@ export const ContentComposer = () => {
   }, []);
 
   const availableDestinations = React.useMemo(() => {
-    const dests: any[] = [];
-    platforms.forEach(p => {
-      let accounts = connectedAccounts.filter(acc => 
+    return platforms.map(p => {
+      // Find if we have a connected account for this platform
+      let matchedAccount = connectedAccounts.find(acc => 
         acc.platform === p.id || 
         (p.id === 'facebook' && acc.platform === 'meta' && acc.profileName.includes('Facebook')) ||
         (p.id === 'instagram' && acc.platform === 'meta' && acc.profileName.includes('Instagram')) ||
         (p.id === 'twitter' && acc.platform === 'x')
       );
       
-      // Fallback for generic meta profiles
-      if (accounts.length === 0 && (p.id === 'facebook' || p.id === 'instagram')) {
-         const generic = connectedAccounts.filter(acc => acc.platform === 'meta');
-         generic.forEach(acc => {
-           if (!dests.find(d => d.profileId === acc._id)) {
-             dests.push({ id: acc._id, profileId: acc._id, platform: p.id, name: acc.profileName + ' (' + p.name + ')', icon: p.icon, color: p.color });
-           }
-         });
+      // Fallback for generic meta profile
+      if (!matchedAccount && (p.id === 'facebook' || p.id === 'instagram')) {
+         matchedAccount = connectedAccounts.find(acc => acc.platform === 'meta');
       }
 
-      if (accounts.length > 0) {
-        accounts.forEach(acc => {
-          dests.push({ id: acc._id, profileId: acc._id, platform: p.id, name: acc.profileName, icon: p.icon, color: p.color });
-        });
-      } else {
-        // ALWAYS show the icon even if not connected!
-        dests.push({ id: p.id, platform: p.id, name: p.name, icon: p.icon, color: p.color });
-      }
+      return {
+        id: p.id,
+        profileId: matchedAccount ? matchedAccount._id : undefined,
+        platform: p.id,
+        name: p.name,
+        icon: p.icon,
+        color: p.color,
+        hoverColor: p.hoverColor
+      };
     });
-    return dests;
   }, [connectedAccounts]);
   const [media, setMedia] = useState<string | null>(null);
   const [scheduledFor, setScheduledFor] = useState('');
@@ -403,14 +398,14 @@ export const ContentComposer = () => {
                       <button
                         type="button"
                         onClick={() => toggleDestination(dest)}
-                        className={`flex items-center gap-2 px-5 py-2.5 rounded-xl border transition-all duration-200 hover:scale-[1.01] ${
+                        className={`group flex items-center gap-2 px-5 py-2.5 rounded-xl border transition-all duration-300 hover:scale-[1.02] ${
                           isSelected 
                             ? 'bg-slate-700 border-indigo-500 shadow-[0_0_15px_rgba(99,102,241,0.2)]' 
                             : 'bg-slate-100 dark:bg-slate-900/50 border-slate-300 dark:border-slate-700 hover:border-slate-400 dark:hover:border-slate-500 hover:bg-slate-200 dark:hover:bg-slate-800'
                         }`}
                       >
-                        <Icon className={`w-4 h-4 ${isSelected ? dest.color : 'text-slate-400 dark:text-slate-400'}`} />
-                        <span className={`text-sm font-semibold ${isSelected ? 'text-white' : 'text-slate-500 dark:text-slate-400'}`}>
+                        <Icon className={`w-4 h-4 transition-all duration-300 ${isSelected ? dest.color + ' drop-shadow-[0_0_8px_currentColor]' : 'text-slate-400 dark:text-slate-500 ' + dest.hoverColor}`} />
+                        <span className={`text-sm font-semibold transition-colors duration-300 ${isSelected ? 'text-white' : 'text-slate-500 dark:text-slate-400 group-hover:text-slate-700 dark:group-hover:text-slate-200'}`}>
                           {dest.name}
                         </span>
                       </button>
