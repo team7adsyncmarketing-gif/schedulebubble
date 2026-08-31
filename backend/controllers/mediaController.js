@@ -12,8 +12,13 @@ export const uploadAsset = async (req, res) => {
     if (!req.file) return res.status(400).json({ message: 'No file uploaded' });
     if (!req.user || !req.user._id) return res.status(401).json({ message: 'User context missing' });
 
-    // multer-storage-cloudinary places the secure URL in req.file.path
-    const fileUrl = req.file.path;
+    // multer-storage-cloudinary might place the URL in path, secure_url, or url
+    const fileUrl = req.file.path || req.file.secure_url || req.file.url;
+    
+    if (!fileUrl) {
+      console.error("Cloudinary upload succeeded but no URL was returned. req.file:", req.file);
+      return res.status(500).json({ message: 'Failed to retrieve image URL from Cloudinary' });
+    }
 
     const mediaAsset = await MediaAsset.create({
       user: req.user._id,
