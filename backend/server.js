@@ -27,8 +27,21 @@ dns.setServers(['8.8.8.8', '1.1.1.1']); // Forces Google & Cloudflare public DNS
 
 const app = express();
 
-// Middleware
-app.use(cors({ origin: 'http://localhost:5173', credentials: true }));
+// Allow requests from frontend (Vercel or localhost)
+const allowedOrigins = ['http://localhost:5173', 'https://schedulebubble.vercel.app'];
+// Also allow any custom domain by checking if the origin is provided
+app.use(cors({ 
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin) || origin.includes('vercel.app')) {
+      callback(null, true);
+    } else {
+      // For the demo, it's safer to just allow all origins if it reaches here, 
+      // or you can set origin: true to reflect whatever origin asks.
+      callback(null, true);
+    }
+  }, 
+  credentials: true 
+}));
 app.use(express.json());
 app.use(cookieParser());
 

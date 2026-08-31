@@ -51,9 +51,8 @@ export const handleXCallback = async (req, res) => {
 
     const me = await loggedClient.v2.me();
 
-    let profile = await SocialProfile.findOne({ user: session.userId, platform: 'x' });
+    let profile = await SocialProfile.findOne({ user: session.userId, platform: 'x', profileId: me.data.id });
     if (profile) {
-      profile.profileId = me.data.id;
       profile.profileName = me.data.username;
       profile.accessToken = accessToken;
       profile.refreshToken = refreshToken;
@@ -72,7 +71,7 @@ export const handleXCallback = async (req, res) => {
     }
 
     delete oauthStateCache[state];
-    res.redirect('http://localhost:5173/dashboard'); // Redirect to frontend dashboard
+    res.redirect('https://schedulebubble.vercel.app/dashboard'); // Redirect to frontend dashboard
   } catch (error) {
     console.error('X callback error:', error);
     res.status(500).send('Error authenticating with X');
@@ -174,7 +173,7 @@ export const handleMetaCallback = async (req, res) => {
     }
 
     delete oauthStateCache[state];
-    res.redirect('http://localhost:5173/dashboard'); // Redirect to frontend dashboard
+    res.redirect('https://schedulebubble.vercel.app/dashboard'); // Redirect to frontend dashboard
   } catch (error) {
     const errData = error.response?.data || error.message || error;
     console.error('Meta callback error:', errData);
@@ -202,10 +201,9 @@ export const connectMetaManual = async (req, res) => {
       return res.status(400).json({ message: 'Invalid Access Token. Facebook verification failed.' });
     }
 
-    let profile = await SocialProfile.findOne({ user: req.user._id, platform: 'meta' });
+    let profile = await SocialProfile.findOne({ user: req.user._id, platform: 'meta', profileId });
     if (profile) {
       profile.accessToken = accessToken;
-      profile.profileId = profileId;
       profile.profileName = `Manual: ${actualProfileName}`;
       await profile.save();
     } else {
@@ -235,10 +233,9 @@ export const connectTwitterManual = async (req, res) => {
       return res.status(400).json({ message: 'Access Token / Bearer Token is required' });
     }
 
-    let profile = await SocialProfile.findOne({ user: req.user._id, platform: 'x' });
+    let profile = await SocialProfile.findOne({ user: req.user._id, platform: 'x', profileId: 'manual-x' });
     if (profile) {
       profile.accessToken = accessToken;
-      profile.profileId = 'manual-x';
       profile.profileName = 'Manual Twitter/X Account';
       await profile.save();
     } else {
@@ -268,10 +265,9 @@ export const connectGoogleManual = async (req, res) => {
       return res.status(400).json({ message: 'Access Token / API Key and Location ID are required' });
     }
 
-    let profile = await SocialProfile.findOne({ user: req.user._id, platform: 'gmb' });
+    let profile = await SocialProfile.findOne({ user: req.user._id, platform: 'gmb', profileId: locationId });
     if (profile) {
       profile.accessToken = accessToken;
-      profile.profileId = locationId;
       profile.profileName = `Manual GMB: ${locationId}`;
       await profile.save();
     } else {
@@ -338,7 +334,7 @@ export const mockConnectPlatform = async (req, res) => {
     if (platform === 'google') profileName = 'Google Business Demo';
     if (platform === 'linkedin') profileName = 'LinkedIn Demo';
     
-    let profile = await SocialProfile.findOne({ user: req.user._id, platform });
+    let profile = await SocialProfile.findOne({ user: req.user._id, platform, profileId: `mock_${platform}_123` });
     if (profile) {
       profile.accessToken = 'mock_token';
       await profile.save();
@@ -370,10 +366,9 @@ export const connectTelegram = async (req, res) => {
       return res.status(400).json({ message: 'Bot Token and Chat ID are required' });
     }
 
-    let profile = await SocialProfile.findOne({ user: req.user._id, platform: 'telegram' });
+    let profile = await SocialProfile.findOne({ user: req.user._id, platform: 'telegram', profileId: chatId });
     if (profile) {
       profile.accessToken = botToken;
-      profile.profileId = chatId;
       profile.profileName = `Chat ID: ${chatId}`;
       await profile.save();
     } else {
@@ -391,3 +386,4 @@ export const connectTelegram = async (req, res) => {
     res.status(500).json({ message: 'Error connecting Telegram' });
   }
 };
+
