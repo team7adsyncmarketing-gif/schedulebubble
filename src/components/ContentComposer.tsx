@@ -221,29 +221,30 @@ export const ContentComposer = () => {
   const availableDestinations = React.useMemo(() => {
     const dests: any[] = [];
     platforms.forEach(p => {
-      if (p.id === 'telegram') {
-        dests.push({ id: 'telegram', platform: 'telegram', name: 'Telegram', icon: p.icon, color: p.color });
-      } else {
-        const accounts = connectedAccounts.filter(acc => 
-          acc.platform === p.id || 
-          (p.id === 'facebook' && acc.platform === 'meta' && acc.profileName.includes('Facebook')) ||
-          (p.id === 'instagram' && acc.platform === 'meta' && acc.profileName.includes('Instagram')) ||
-          (p.id === 'twitter' && acc.platform === 'x')
-        );
-        
-        // Fallback for old meta profiles without specific FB/IG name
-        if (accounts.length === 0 && (p.id === 'facebook' || p.id === 'instagram')) {
-           const generic = connectedAccounts.filter(acc => acc.platform === 'meta');
-           generic.forEach(acc => {
-             if (!dests.find(d => d.profileId === acc._id)) {
-               dests.push({ id: acc._id, profileId: acc._id, platform: p.id, name: acc.profileName + ' (' + p.name + ')', icon: p.icon, color: p.color });
-             }
-           });
-        }
+      let accounts = connectedAccounts.filter(acc => 
+        acc.platform === p.id || 
+        (p.id === 'facebook' && acc.platform === 'meta' && acc.profileName.includes('Facebook')) ||
+        (p.id === 'instagram' && acc.platform === 'meta' && acc.profileName.includes('Instagram')) ||
+        (p.id === 'twitter' && acc.platform === 'x')
+      );
+      
+      // Fallback for generic meta profiles
+      if (accounts.length === 0 && (p.id === 'facebook' || p.id === 'instagram')) {
+         const generic = connectedAccounts.filter(acc => acc.platform === 'meta');
+         generic.forEach(acc => {
+           if (!dests.find(d => d.profileId === acc._id)) {
+             dests.push({ id: acc._id, profileId: acc._id, platform: p.id, name: acc.profileName + ' (' + p.name + ')', icon: p.icon, color: p.color });
+           }
+         });
+      }
 
+      if (accounts.length > 0) {
         accounts.forEach(acc => {
           dests.push({ id: acc._id, profileId: acc._id, platform: p.id, name: acc.profileName, icon: p.icon, color: p.color });
         });
+      } else {
+        // ALWAYS show the icon even if not connected!
+        dests.push({ id: p.id, platform: p.id, name: p.name, icon: p.icon, color: p.color });
       }
     });
     return dests;
