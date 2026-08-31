@@ -203,7 +203,7 @@ export const ContentComposer = () => {
     const fetchAccounts = async () => {
       try {
         const token = localStorage.getItem('token');
-        const res = await fetch('https://schedulebubble-zjof.onrender.com/api/oauth/connected', {
+        const res = await fetch('https://schedulebubble-zjof.onrender.com/api/oauth/accounts', {
           headers: token ? { 'Authorization': 'Bearer ' + token } : {},
           credentials: 'include'
         });
