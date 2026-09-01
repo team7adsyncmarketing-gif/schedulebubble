@@ -35,6 +35,7 @@ export default function Queues() {
   
   // Edit Modal State
   const [editingJob, setEditingJob] = useState<ScheduledPost | null>(null);
+  const [viewingJob, setViewingJob] = useState<ScheduledPost | null>(null);
   const [editContent, setEditContent] = useState('');
   const [editDate, setEditDate] = useState('');
   const [isSaving, setIsSaving] = useState(false);
@@ -297,17 +298,15 @@ export default function Queues() {
                   </span>
                 </div>
 
-                <div className="flex-grow mb-4">
-                  <p className="text-slate-300 text-sm whitespace-pre-wrap">{job.post?.content}</p>
+                <div 
+                  className="flex-grow mb-4 cursor-pointer group" 
+                  onClick={() => setViewingJob(job)}
+                >
+                  <p className="text-slate-300 text-sm line-clamp-4 group-hover:text-slate-200 transition-colors">{job.post?.content}</p>
                   {job.post?.mediaUrls && job.post.mediaUrls.length > 0 && (
-                    <div className="mt-4 space-y-2">
-                      {job.post.mediaUrls.map((url, index) => (
-                        url.toLowerCase().endsWith('.mp4') ? (
-                          <video key={index} src={url} className="w-full max-h-48 object-cover rounded-lg border border-slate-700/50 shadow-md" controls muted />
-                        ) : (
-                          <img key={index} src={url} alt="Attached Media" className="w-full max-h-48 object-cover rounded-lg border border-slate-700/50 shadow-md" />
-                        )
-                      ))}
+                    <div className="mt-3 flex items-center gap-2 text-xs text-slate-500 bg-slate-800/50 px-2 py-1 rounded w-fit border border-slate-700/50 group-hover:bg-slate-700/50 transition-colors">
+                      <ImageIcon className="w-3 h-3" />
+                      Media Attached
                     </div>
                   )}
                 </div>
@@ -438,6 +437,59 @@ export default function Queues() {
                       {isSaving ? 'Saving...' : 'Save Changes'}
                     </button>
                   </Magnetic>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* View Modal */}
+      {viewingJob && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 sm:p-6 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200" onClick={() => setViewingJob(null)}>
+          <div className="bg-slate-900 border border-slate-700 rounded-3xl p-6 sm:p-8 w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl relative animate-in zoom-in-95 duration-200" onClick={e => e.stopPropagation()}>
+            <button 
+              onClick={() => setViewingJob(null)}
+              className="absolute top-4 right-4 p-2 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white rounded-full transition shadow-md"
+            >
+              <X className="w-5 h-5" />
+            </button>
+            <div className="flex items-center gap-4 mb-6">
+              <div className={`w-12 h-12 rounded-full bg-slate-800 flex items-center justify-center border border-slate-700 ${platformIcons[viewingJob.platform]?.color}`}>
+                {React.createElement(platformIcons[viewingJob.platform]?.icon || Clock, { className: "w-6 h-6" })}
+              </div>
+              <div>
+                <h3 className="text-xl font-bold text-white capitalize">{platformIcons[viewingJob.platform]?.name || viewingJob.platform}</h3>
+                <p className="text-sm text-slate-400 font-medium">
+                  {viewingJob.status === 'failed' ? 'Failed to Publish' : viewingJob.status === 'draft' ? 'Draft' : viewingJob.status === 'published' ? 'Published' : 'Scheduled'}
+                </p>
+              </div>
+            </div>
+            <div className="mb-6">
+              <p className="text-slate-200 whitespace-pre-wrap leading-relaxed text-[15px]">{viewingJob.post?.content}</p>
+            </div>
+            {viewingJob.post?.mediaUrls && viewingJob.post.mediaUrls.length > 0 && (
+              <div className="mb-6 space-y-4">
+                {viewingJob.post.mediaUrls.map((url, i) => (
+                  url.toLowerCase().endsWith('.mp4') ? (
+                    <video key={i} src={url} className="w-full rounded-2xl border border-slate-700/80 shadow-lg" controls />
+                  ) : (
+                    <img key={i} src={url} alt="Attached Media" className="w-full rounded-2xl border border-slate-700/80 shadow-lg" />
+                  )
+                ))}
+              </div>
+            )}
+            <div className="pt-6 border-t border-slate-800/80">
+              <div className="flex items-center gap-2 text-sm text-slate-400 mb-2 font-medium">
+                <Clock className="w-4 h-4 text-indigo-400" />
+                {viewingJob.scheduledFor ? new Date(viewingJob.scheduledFor).toLocaleString(undefined, { 
+                  weekday: 'long', month: 'long', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' 
+                }) : 'No scheduled date'}
+              </div>
+              {viewingJob.status === 'failed' && viewingJob.errorMessage && (
+                <div className="mt-4 p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-sm text-red-400 font-medium">
+                  <span className="block font-bold mb-1">Error Details:</span>
+                  {viewingJob.errorMessage}
                 </div>
               )}
             </div>
