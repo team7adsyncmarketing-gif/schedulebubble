@@ -339,8 +339,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
                   <button
                     type="button"
                     onClick={() => setMode(mode === 'login' ? 'register' : 'login')}
-                    className="font-medium hover:underline transition-all"
-                    style={{ color: textPrimary }}
+                    className="font-bold text-indigo-500 hover:text-indigo-600 dark:text-indigo-400 dark:hover:text-indigo-300 transition-all"
                   >
                     {mode === 'login' ? 'Sign up' : 'Sign in'}
                   </button>
