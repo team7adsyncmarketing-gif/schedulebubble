@@ -299,7 +299,7 @@ export const ContentComposer = () => {
           content,
           destinations: selectedDestinations,
           mediaUrls: media ? [media] : [],
-          scheduledFor: isScheduling ? scheduledFor : undefined,
+          scheduledFor: isScheduling ? new Date(scheduledFor).toISOString() : undefined,
           status: isScheduling ? 'scheduled' : 'published',
         }),
         credentials: 'include',
