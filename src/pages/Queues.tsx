@@ -298,11 +298,16 @@ export default function Queues() {
                 </div>
 
                 <div className="flex-grow mb-4">
-                  <p className="text-slate-300 text-sm line-clamp-4">{job.post?.content}</p>
+                  <p className="text-slate-300 text-sm whitespace-pre-wrap">{job.post?.content}</p>
                   {job.post?.mediaUrls && job.post.mediaUrls.length > 0 && (
-                    <div className="mt-3 flex items-center gap-2 text-xs text-slate-500 bg-slate-800/50 px-2 py-1 rounded w-fit border border-slate-700/50">
-                      <ImageIcon className="w-3 h-3" />
-                      Media Attached
+                    <div className="mt-4 space-y-2">
+                      {job.post.mediaUrls.map((url, index) => (
+                        url.toLowerCase().endsWith('.mp4') ? (
+                          <video key={index} src={url} className="w-full max-h-48 object-cover rounded-lg border border-slate-700/50 shadow-md" controls muted />
+                        ) : (
+                          <img key={index} src={url} alt="Attached Media" className="w-full max-h-48 object-cover rounded-lg border border-slate-700/50 shadow-md" />
+                        )
+                      ))}
                     </div>
                   )}
                 </div>
