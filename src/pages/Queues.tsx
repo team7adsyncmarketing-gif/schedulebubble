@@ -38,8 +38,10 @@ export default function Queues() {
   const [editContent, setEditContent] = useState('');
   const [editDate, setEditDate] = useState('');
   const [isSaving, setIsSaving] = useState(false);
+  const [selectedJobs, setSelectedJobs] = useState<string[]>([]);
 
   useEffect(() => {
+    setSelectedJobs([]);
     fetchQueue();
   }, [activeTab]);
 
@@ -85,12 +87,36 @@ export default function Queues() {
         credentials: 'include'
       });
       if (res.ok) {
-        setJobs(jobs.filter(j => j._id !== id));
+        setJobs(prev => prev.filter(j => j._id !== id));
+        setSelectedJobs(prev => prev.filter(jobId => jobId !== id));
       } else {
         alert('Failed to delete post');
       }
     } catch (err) {
       alert('Error deleting post');
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedJobs.length === 0) return;
+    if (!window.confirm(`Are you sure you want to delete ${selectedJobs.length} selected posts?`)) return;
+    
+    try {
+      const token = localStorage.getItem('token');
+      
+      // Delete in parallel
+      await Promise.all(selectedJobs.map(id => 
+        fetch(`https://schedulebubble-zjof.onrender.com/api/posts/queue/${id}`, {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${token}` },
+          credentials: 'include'
+        })
+      ));
+      
+      setJobs(prev => prev.filter(j => !selectedJobs.includes(j._id)));
+      setSelectedJobs([]);
+    } catch (err) {
+      alert('Error deleting some posts');
     }
   };
 
@@ -202,6 +228,31 @@ export default function Queues() {
         </div>
       </div>
 
+      {!loading && jobs.length > 0 && (
+        <div className="flex items-center justify-between mb-6 bg-slate-900/40 p-3 rounded-xl border border-slate-800/60">
+          <div className="flex items-center gap-3 pl-2">
+            <input 
+              type="checkbox" 
+              checked={selectedJobs.length === jobs.length && jobs.length > 0}
+              onChange={(e) => setSelectedJobs(e.target.checked ? jobs.map(j => j._id) : [])}
+              className="w-4 h-4 rounded border-slate-700 bg-slate-800 text-indigo-600 focus:ring-indigo-500/20 cursor-pointer"
+            />
+            <span className="text-sm font-medium text-slate-300">
+              {selectedJobs.length > 0 ? `${selectedJobs.length} selected` : 'Select All'}
+            </span>
+          </div>
+          {selectedJobs.length > 0 && (
+            <button 
+              onClick={handleBulkDelete}
+              className="px-3 py-1.5 text-xs font-medium bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/20 rounded-lg transition-colors flex items-center gap-2"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              Delete Selected
+            </button>
+          )}
+        </div>
+      )}
+
       {error && <div className="p-4 mb-6 bg-red-500/10 border border-red-500/20 text-red-400 rounded-xl">{error}</div>}
 
       {jobs.length === 0 ? (
@@ -218,9 +269,19 @@ export default function Queues() {
             const isFailed = job.status === 'failed';
             
             return (
-              <div key={job._id} className={`flex flex-col bg-slate-900/50 backdrop-blur-xl border rounded-2xl p-6 shadow-xl transition-all duration-300 ${isFailed ? 'border-red-500/50 shadow-[0_0_15px_rgba(239,68,68,0.15)] hover:border-red-500/70' : 'border-slate-800/80 hover:border-indigo-500/30'}`}>
+            <div key={job._id} className="relative">
+              <div className={`flex flex-col h-full bg-slate-900/50 backdrop-blur-xl border rounded-2xl p-6 shadow-xl transition-all duration-300 ${isFailed ? 'border-red-500/50 shadow-[0_0_15px_rgba(239,68,68,0.15)] hover:border-red-500/70' : 'border-slate-800/80 hover:border-indigo-500/30'} ${selectedJobs.includes(job._id) ? 'ring-2 ring-indigo-500/50 border-indigo-500/50 bg-slate-800/80' : ''}`}>
                 <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-3">
+                    <input 
+                      type="checkbox" 
+                      checked={selectedJobs.includes(job._id)}
+                      onChange={(e) => {
+                        if (e.target.checked) setSelectedJobs(prev => [...prev, job._id]);
+                        else setSelectedJobs(prev => prev.filter(id => id !== job._id));
+                      }}
+                      className="w-4 h-4 rounded border-slate-700 bg-slate-800 text-indigo-600 focus:ring-indigo-500/20 cursor-pointer"
+                    />
                     <div className={`w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center border border-slate-700 ${platform?.color}`}>
                       <Icon className="w-4 h-4" />
                     </div>
@@ -286,7 +347,8 @@ export default function Queues() {
                   </button>
                 </div>
               </div>
-            )
+            </div>
+          )
           })}
         </div>
       )}
