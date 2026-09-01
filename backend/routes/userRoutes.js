@@ -1,11 +1,10 @@
 import express from 'express';
 import { uploadProfilePicture } from '../controllers/userController.js';
 import { protect } from '../middleware/authMiddleware.js';
-import { uploadCloudinary } from '../config/cloudinary.js';
+import { upload } from '../controllers/mediaController.js';
 
 const router = express.Router();
 
-// Route for uploading a profile picture
-router.put('/profile-picture', protect, uploadCloudinary.single('image'), uploadProfilePicture);
+router.put('/profile-picture', protect, upload.single('image'), uploadProfilePicture);
 
 export default router;

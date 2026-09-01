@@ -1,5 +1,3 @@
-import PublishJob from '../models/PublishJob.js';
-import SocialProfile from '../models/SocialProfile.js';
 import axios from 'axios';
 
 export const startInsightsService = () => {

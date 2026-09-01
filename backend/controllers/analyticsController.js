@@ -1,26 +1,25 @@
-import Post from '../models/Post.js';
-import PublishJob from '../models/PublishJob.js';
+import { supabase } from '../config/supabase.js';
 
 // @desc    Get dashboard analytics summary
 // @route   GET /api/analytics/summary
 // @access  Private
 export const getAnalyticsSummary = async (req, res) => {
   try {
-    const totalPosts = await Post.countDocuments({ user: req.user._id });
-    const scheduledCount = await PublishJob.countDocuments({ user: req.user._id, status: 'scheduled' });
-    const publishedCount = await PublishJob.countDocuments({ user: req.user._id, status: 'published' });
-    const failedCount = await PublishJob.countDocuments({ user: req.user._id, status: 'failed' });
+    const { count: totalPosts } = await supabase.from('posts').select('*', { count: 'exact', head: true }).eq('user_id', req.user.id);
+    const { count: scheduledCount } = await supabase.from('publish_jobs').select('*', { count: 'exact', head: true }).eq('user_id', req.user.id).eq('status', 'scheduled');
+    const { count: publishedCount } = await supabase.from('publish_jobs').select('*', { count: 'exact', head: true }).eq('user_id', req.user.id).eq('status', 'published');
+    const { count: failedCount } = await supabase.from('publish_jobs').select('*', { count: 'exact', head: true }).eq('user_id', req.user.id).eq('status', 'failed');
     
     let successRate = '100%';
-    const totalProcessed = publishedCount + failedCount;
+    const totalProcessed = (publishedCount || 0) + (failedCount || 0);
     if (totalProcessed > 0) {
-      successRate = Math.round((publishedCount / totalProcessed) * 100) + '%';
+      successRate = Math.round(((publishedCount || 0) / totalProcessed) * 100) + '%';
     }
 
     res.json({
-      publishedCount,
-      scheduledCount,
-      totalPosts,
+      publishedCount: publishedCount || 0,
+      scheduledCount: scheduledCount || 0,
+      totalPosts: totalPosts || 0,
       successRate,
     });
   } catch (error) {
@@ -33,23 +32,26 @@ export const getAnalyticsSummary = async (req, res) => {
 // @access  Private
 export const getCalendarPosts = async (req, res) => {
   try {
-    const jobs = await PublishJob.find({ 
-      user: req.user._id, 
-      status: { $in: ['scheduled', 'published'] }
-    }).populate('post').sort({ scheduledFor: 1, createdAt: -1 });
+    const { data: jobs, error } = await supabase
+      .from('publish_jobs')
+      .select('*, post:posts(*)')
+      .eq('user_id', req.user.id)
+      .in('status', ['scheduled', 'published'])
+      .order('scheduled_for', { ascending: true });
+      
+    if (error) throw error;
     
-    // Group jobs by post ID so the UI gets unique posts with an array of platforms
     const postMap = new Map();
     for (const job of jobs) {
       if (!job.post) continue;
-      const postId = job.post._id.toString();
+      const postId = job.post.id;
       if (!postMap.has(postId)) {
         postMap.set(postId, {
-          _id: job.post._id,
+          _id: job.post.id,
           content: job.post.content,
-          mediaUrls: job.post.mediaUrls,
-          scheduledFor: job.post.scheduledFor,
-          createdAt: job.post.createdAt,
+          mediaUrls: job.post.media_urls,
+          scheduledFor: job.post.scheduled_for || job.post.created_at,
+          createdAt: job.post.created_at,
           status: job.status,
           platforms: []
         });
@@ -72,7 +74,12 @@ export const getCalendarPosts = async (req, res) => {
 // @access  Private
 export const getDashboardData = async (req, res) => {
   try {
-    const jobs = await PublishJob.find({ user: req.user._id });
+    const { data: jobs, error } = await supabase
+      .from('publish_jobs')
+      .select('platform, status, created_at')
+      .eq('user_id', req.user.id);
+
+    if (error) throw error;
     
     const platformCounts = {
       telegram: 0, x: 0, linkedin: 0, facebook: 0, instagram: 0, gmb: 0
@@ -83,7 +90,6 @@ export const getDashboardData = async (req, res) => {
     const timelineMap = new Map();
 
     jobs.forEach(job => {
-      // Platform breakdown
       const p = job.platform.toLowerCase();
       if (platformCounts[p] !== undefined) {
         platformCounts[p]++;
@@ -91,13 +97,11 @@ export const getDashboardData = async (req, res) => {
         platformCounts.x++;
       }
 
-      // Success rate
       if (job.status === 'published') totalSuccess++;
       if (job.status === 'failed') totalFailed++;
 
-      // Timeline (last 30 days published)
-      if (job.status === 'published' && job.createdAt) {
-        const date = new Date(job.createdAt).toISOString().split('T')[0];
+      if (job.status === 'published' && job.created_at) {
+        const date = new Date(job.created_at).toISOString().split('T')[0];
         timelineMap.set(date, (timelineMap.get(date) || 0) + 1);
       }
     });

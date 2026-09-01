@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
+import { supabase } from './lib/supabase';
 import './index.css';
 import HeroSection from './HeroSection';
 import Dashboard from './pages/Dashboard';
@@ -68,47 +69,66 @@ function App() {
   const [authEmail, setAuthEmail] = useState('');
 
   useEffect(() => {
-    const checkAuth = async () => {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        setIsAuthenticated(false);
-        setUser(null);
-        return;
-      }
+    let mounted = true;
 
-      try {
-        const response = await fetch('https://schedulebubble-zjof.onrender.com/api/auth/me', {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
-
-        if (response.ok) {
-          const userData = await response.json();
-          setUser(userData);
-          setIsAuthenticated(true);
-        } else {
-          // Token invalid or expired
-          localStorage.removeItem('token');
+    const getInitialSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (session) {
+        localStorage.setItem('token', session.access_token);
+        if (mounted) fetchUserProfile(session.access_token);
+      } else {
+        localStorage.removeItem('token');
+        if (mounted) {
           setIsAuthenticated(false);
           setUser(null);
         }
-      } catch (error) {
-        console.error('Error fetching user data:', error);
       }
     };
 
-    checkAuth();
+    getInitialSession();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      if (session) {
+        localStorage.setItem('token', session.access_token);
+        if (mounted) fetchUserProfile(session.access_token);
+      } else {
+        localStorage.removeItem('token');
+        if (mounted) {
+          setIsAuthenticated(false);
+          setUser(null);
+        }
+      }
+    });
+
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
-  const handleLogout = () => {
-    document.cookie
-      .split(';')
-      .forEach((c) => {
-        document.cookie = c
-          .replace(/^ +/, '')
-          .replace(/=.*/, `=;expires=${new Date().toUTCString()};path=/`);
+  const fetchUserProfile = async (token: string) => {
+    try {
+      const response = await fetch('https://schedulebubble-zjof.onrender.com/api/auth/me', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
       });
+      if (response.ok) {
+        const userData = await response.json();
+        setUser(userData);
+        setIsAuthenticated(true);
+      } else {
+        // If our backend rejects the supabase token, clear it
+        setIsAuthenticated(false);
+      }
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+    }
+  };
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
     localStorage.removeItem('token');
     setUser(null);
     setIsAuthenticated(false);

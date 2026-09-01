@@ -1,16 +1,11 @@
-import jwt from 'jsonwebtoken';
-import User from '../models/User.js';
+import { supabase } from '../config/supabase.js';
 
 const protect = async (req, res, next) => {
   let token;
 
-  // Read the JWT from the cookie
-  token = req.cookies?.jwt;
-
-  // Alternatively, check authorization header (if cookies are not used exclusively)
-  if (!token && req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+  if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
     token = req.headers.authorization.split(' ')[1];
-  } else if (!token && req.query && req.query.token) {
+  } else if (req.query && req.query.token) {
     token = req.query.token;
   }
 
@@ -20,10 +15,25 @@ const protect = async (req, res, next) => {
 
   if (token) {
     try {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      // Verify token with Supabase
+      const { data: { user }, error } = await supabase.auth.getUser(token);
 
-      req.user = await User.findById(decoded.userId).select('-password');
+      if (error || !user) {
+        throw new Error('Not authorized');
+      }
 
+      // Fetch profile from our profiles table
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+
+      if (profileError || !profile) {
+        throw new Error('Profile not found');
+      }
+
+      req.user = profile;
       next();
     } catch (error) {
       console.error(error);

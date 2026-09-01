@@ -62,11 +62,11 @@ export const IntegrationsPanel = () => {
   const handleManualMetaConnect = async () => {
     if (!metaToken || !metaProfileId) return alert('Token and ID are required');
     const token = localStorage.getItem('token');
-    
+
     try {
       const response = await fetch(`https://schedulebubble-zjof.onrender.com/api/oauth/meta-manual`, {
         method: 'POST',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
           ...(token ? { 'Authorization': `Bearer ${token}` } : {})
         },
@@ -93,7 +93,7 @@ export const IntegrationsPanel = () => {
     try {
       const response = await fetch(`https://schedulebubble-zjof.onrender.com/api/oauth/twitter-manual`, {
         method: 'POST',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
           ...(token ? { 'Authorization': `Bearer ${token}` } : {})
         },
@@ -115,7 +115,7 @@ export const IntegrationsPanel = () => {
 
   const handleManualGoogleConnect = async () => {
     if (!googleToken || !googleAccountId || !googleLocationId) return alert('Token, Account ID, and Location ID are required');
-    
+
     // Concatenate safely handling cases where user pasted the full prefix or just the ID number
     const accId = googleAccountId.replace('accounts/', '');
     const locId = googleLocationId.replace('locations/', '');
@@ -125,7 +125,7 @@ export const IntegrationsPanel = () => {
     try {
       const response = await fetch(`https://schedulebubble-zjof.onrender.com/api/oauth/google-manual`, {
         method: 'POST',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
           ...(token ? { 'Authorization': `Bearer ${token}` } : {})
         },
@@ -149,7 +149,7 @@ export const IntegrationsPanel = () => {
 
   const handleConnect = async (platformId: string) => {
     const token = localStorage.getItem('token');
-    
+
     if (platformId === 'telegram') {
       const botToken = prompt('Enter your Telegram Bot Token (leave blank to use backend .env):') || '';
       const chatId = prompt('Enter your Telegram Chat ID (leave blank to use backend .env):') || '';
@@ -157,7 +157,7 @@ export const IntegrationsPanel = () => {
       try {
         const response = await fetch(`https://schedulebubble-zjof.onrender.com/api/oauth/telegram`, {
           method: 'POST',
-          headers: { 
+          headers: {
             'Content-Type': 'application/json',
             ...(token ? { 'Authorization': `Bearer ${token}` } : {})
           },
@@ -190,13 +190,13 @@ export const IntegrationsPanel = () => {
     try {
       const response = await fetch(`https://schedulebubble-zjof.onrender.com/api/oauth/connect/${platformId}`, {
         method: 'POST',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
           ...(token ? { 'Authorization': `Bearer ${token}` } : {})
         },
         credentials: 'include',
       });
-      
+
       if (response.ok) {
         fetchAccounts(); // Refresh the list to show Connected state
       } else {
@@ -217,7 +217,7 @@ export const IntegrationsPanel = () => {
         headers: token ? { 'Authorization': `Bearer ${token}` } : {},
         credentials: 'include',
       });
-      
+
       if (response.ok) {
         fetchAccounts();
       } else {
@@ -241,7 +241,7 @@ export const IntegrationsPanel = () => {
       <div className="space-y-4">
         {platforms.map((platform) => {
           let platformAccounts = connectedAccounts.filter(acc => acc.platform === platform.id);
-          
+
           // Map backend platform strings ('meta', 'x') to frontend platform IDs
           if (platformAccounts.length === 0) {
             if (platform.id === 'facebook') {
@@ -255,15 +255,15 @@ export const IntegrationsPanel = () => {
 
           // If the platform is generic meta (no specific Facebook/Instagram tag), show all meta under both for safety, but with names
           if (platformAccounts.length === 0 && (platform.id === 'facebook' || platform.id === 'instagram')) {
-              platformAccounts = connectedAccounts.filter(acc => acc.platform === 'meta');
+            platformAccounts = connectedAccounts.filter(acc => acc.platform === 'meta');
           }
 
           const isConnected = platformAccounts.length > 0;
           const Icon = platform.icon;
 
           return (
-            <div 
-              key={platform.id} 
+            <div
+              key={platform.id}
               className="group flex flex-col p-5 rounded-2xl border border-slate-200 dark:border-slate-800/60 hover:border-slate-300 dark:hover:border-slate-700/80 transition-all duration-200 cursor-default bg-white/60 dark:bg-[rgba(15,20,35,0.5)]"
             >
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -288,16 +288,15 @@ export const IntegrationsPanel = () => {
                 <div className="w-full sm:w-auto flex flex-col sm:flex-row gap-2">
                   <button
                     onClick={() => handleConnect(platform.id)}
-                    className={`w-full sm:w-auto px-5 py-2.5 text-sm font-semibold rounded-xl transition-all duration-300 flex items-center justify-center gap-2 ${
-                      isConnected 
+                    className={`w-full sm:w-auto px-5 py-2.5 text-sm font-semibold rounded-xl transition-all duration-300 flex items-center justify-center gap-2 ${isConnected
                         ? 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700'
                         : 'text-white bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 shadow-[0_0_15px_rgba(79,70,229,0.2)] hover:shadow-[0_0_25px_rgba(79,70,229,0.4)] hover:-translate-y-0.5'
-                    }`}
+                      }`}
                   >
                     <Plus className="w-4 h-4" />
                     {isConnected ? 'Add Another' : 'Connect Account'}
                   </button>
-                  
+
                   {!isConnected && (platform.id === 'facebook' || platform.id === 'instagram') && (
                     <button
                       onClick={() => setManualMetaModalOpen(true)}
@@ -332,7 +331,7 @@ export const IntegrationsPanel = () => {
                     <div key={account._id} className="flex items-center justify-between bg-slate-50 dark:bg-slate-800/30 p-3 rounded-xl border border-slate-100 dark:border-slate-700/30">
                       <div className="flex items-center space-x-3">
                         <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white ${platform.color.replace('text-', 'bg-').split(' ')[0]}`}>
-                           <Icon className="w-4 h-4" />
+                          <Icon className="w-4 h-4" />
                         </div>
                         <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">
                           {account.profileName}

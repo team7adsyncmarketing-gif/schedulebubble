@@ -1,6 +1,4 @@
-import Post from '../models/Post.js';
-import PublishJob from '../models/PublishJob.js';
-import SocialProfile from '../models/SocialProfile.js';
+import { supabase } from '../config/supabase.js';
 
 // @desc    Create a new post
 // @route   POST /api/posts
@@ -8,8 +6,6 @@ import SocialProfile from '../models/SocialProfile.js';
 export const createPost = async (req, res) => {
   const { content, mediaUrls, platforms, destinations, scheduledFor, status, instagramFormat } = req.body;
 
-  // destinations: [{ profileId?: string, platform: string }]
-  // If destinations is not provided, fall back to mapping 'platforms' (for backwards compatibility)
   let finalDestinations = destinations || [];
   if (finalDestinations.length === 0 && platforms && platforms.length > 0) {
     finalDestinations = platforms.map(p => ({ platform: p }));
@@ -20,36 +16,40 @@ export const createPost = async (req, res) => {
   }
 
   try {
-    // 2. Determine initial status
     let initialStatus = status || 'scheduled';
-    let finalScheduledFor = scheduledFor ? new Date(scheduledFor) : new Date();
-    const isSandbox = process.env.SANDBOX_MODE === 'true';
+    let finalScheduledFor = scheduledFor ? new Date(scheduledFor).toISOString() : new Date().toISOString();
 
-    // If user clicked "Post Now" (status === 'published'), set job status to 'scheduled' for current time so publisherService picks it up immediately
     const jobStatus = initialStatus === 'published' ? 'scheduled' : initialStatus;
 
-    // 3. Create the post (canonical content)
-    const post = await Post.create({
-      user: req.user._id,
-      content,
-      mediaUrls: mediaUrls || [],
-      scheduledFor: finalScheduledFor,
-      instagramFormat: instagramFormat || 'feed',
-    });
-
-    // 4. Create isolated publish jobs for each destination
-    const jobs = await Promise.all(
-      finalDestinations.map(async (dest) => {
-        return await PublishJob.create({
-          user: req.user._id,
-          post: post._id,
-          platform: dest.platform,
-          socialProfile: dest.profileId || null,
-          status: jobStatus,
-          scheduledFor: finalScheduledFor,
-        });
+    // 1. Create Post
+    const { data: post, error: postError } = await supabase
+      .from('posts')
+      .insert({
+        user_id: req.user.id,
+        content,
+        media_urls: mediaUrls || [],
       })
-    );
+      .select()
+      .single();
+
+    if (postError) throw postError;
+
+    // 2. Create Publish Jobs
+    const jobsToInsert = finalDestinations.map(dest => ({
+      user_id: req.user.id,
+      post_id: post.id,
+      platform: dest.platform,
+      social_profile_id: dest.profileId || null,
+      status: jobStatus,
+      scheduled_for: finalScheduledFor,
+    }));
+
+    const { data: jobs, error: jobsError } = await supabase
+      .from('publish_jobs')
+      .insert(jobsToInsert)
+      .select();
+
+    if (jobsError) throw jobsError;
 
     res.status(201).json(post);
   } catch (error) {
@@ -63,8 +63,14 @@ export const createPost = async (req, res) => {
 // @access  Private
 export const getPosts = async (req, res) => {
   try {
-    const posts = await Post.find({ user: req.user._id }).sort({ createdAt: -1 });
-    res.status(200).json(posts);
+    const { data: posts, error } = await supabase
+      .from('posts')
+      .select('*')
+      .eq('user_id', req.user.id)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    res.status(200).json(posts.map(p => ({ ...p, _id: p.id, user: p.user_id, mediaUrls: p.media_urls })));
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server error fetching posts' });
@@ -76,10 +82,20 @@ export const getPosts = async (req, res) => {
 // @access  Private
 export const getQueue = async (req, res) => {
   try {
-    const jobs = await PublishJob.find({ user: req.user._id, status: 'scheduled' })
-      .populate('post')
-      .sort({ scheduledFor: 1 });
-    res.status(200).json(jobs);
+    const { data: jobs, error } = await supabase
+      .from('publish_jobs')
+      .select('*, post:posts(*)')
+      .eq('user_id', req.user.id)
+      .eq('status', 'scheduled')
+      .order('scheduled_for', { ascending: true });
+
+    if (error) throw error;
+    res.status(200).json(jobs.map(j => ({
+      ...j,
+      _id: j.id,
+      scheduledFor: j.scheduled_for,
+      post: { ...j.post, _id: j.post.id, mediaUrls: j.post.media_urls }
+    })));
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server error fetching queue' });
@@ -91,10 +107,19 @@ export const getQueue = async (req, res) => {
 // @access  Private
 export const getDrafts = async (req, res) => {
   try {
-    const drafts = await PublishJob.find({ user: req.user._id, status: 'draft' })
-      .populate('post')
-      .sort({ createdAt: -1 });
-    res.status(200).json(drafts);
+    const { data: drafts, error } = await supabase
+      .from('publish_jobs')
+      .select('*, post:posts(*)')
+      .eq('user_id', req.user.id)
+      .eq('status', 'draft')
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    res.status(200).json(drafts.map(j => ({
+      ...j,
+      _id: j.id,
+      post: { ...j.post, _id: j.post.id, mediaUrls: j.post.media_urls }
+    })));
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server error fetching drafts' });
@@ -106,10 +131,20 @@ export const getDrafts = async (req, res) => {
 // @access  Private
 export const getPublished = async (req, res) => {
   try {
-    const published = await PublishJob.find({ user: req.user._id, status: { $in: ['published', 'failed'] } })
-      .populate('post')
-      .sort({ updatedAt: -1 });
-    res.status(200).json(published);
+    const { data: published, error } = await supabase
+      .from('publish_jobs')
+      .select('*, post:posts(*)')
+      .eq('user_id', req.user.id)
+      .in('status', ['published', 'failed'])
+      .order('updated_at', { ascending: false });
+
+    if (error) throw error;
+    res.status(200).json(published.map(j => ({
+      ...j,
+      _id: j.id,
+      updatedAt: j.updated_at,
+      post: { ...j.post, _id: j.post.id, mediaUrls: j.post.media_urls }
+    })));
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server error fetching published posts' });
@@ -121,36 +156,34 @@ export const getPublished = async (req, res) => {
 // @access  Private
 export const updateScheduledPost = async (req, res) => {
   try {
-    const job = await PublishJob.findById(req.params.id);
-    if (!job) {
-      return res.status(404).json({ message: 'Job not found' });
-    }
-    if (job.user.toString() !== req.user._id.toString()) {
-      return res.status(401).json({ message: 'Not authorized' });
-    }
-
     const { content, scheduledFor, status, instagramFormat } = req.body;
 
-    if (scheduledFor) {
-      job.scheduledFor = new Date(scheduledFor);
-    }
-    
-    if (status) {
-      job.status = status;
-    }
-    
-    await job.save();
+    // Check if job belongs to user
+    const { data: jobCheck, error: jobCheckError } = await supabase
+      .from('publish_jobs')
+      .select('*')
+      .eq('id', req.params.id)
+      .eq('user_id', req.user.id)
+      .single();
 
-    if (content !== undefined || instagramFormat !== undefined) {
-      const post = await Post.findById(job.post);
-      if (post) {
-        if (content !== undefined) post.content = content;
-        if (instagramFormat !== undefined) post.instagramFormat = instagramFormat;
-        await post.save();
-      }
+    if (jobCheckError || !jobCheck) {
+      return res.status(404).json({ message: 'Job not found or not authorized' });
     }
 
-    res.status(200).json(job);
+    const updates = {};
+    if (scheduledFor) updates.scheduled_for = new Date(scheduledFor).toISOString();
+    if (status) updates.status = status;
+    updates.updated_at = new Date().toISOString();
+
+    if (Object.keys(updates).length > 0) {
+      await supabase.from('publish_jobs').update(updates).eq('id', jobCheck.id);
+    }
+
+    if (content !== undefined) {
+      await supabase.from('posts').update({ content }).eq('id', jobCheck.post_id);
+    }
+
+    res.status(200).json({ message: 'Updated' });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server error updating job' });
@@ -162,15 +195,13 @@ export const updateScheduledPost = async (req, res) => {
 // @access  Private
 export const deleteScheduledPost = async (req, res) => {
   try {
-    const job = await PublishJob.findById(req.params.id);
-    if (!job) {
-      return res.status(404).json({ message: 'Job not found' });
-    }
-    if (job.user.toString() !== req.user._id.toString()) {
-      return res.status(401).json({ message: 'Not authorized' });
-    }
+    const { error } = await supabase
+      .from('publish_jobs')
+      .delete()
+      .eq('id', req.params.id)
+      .eq('user_id', req.user.id);
 
-    await job.deleteOne();
+    if (error) throw error;
     res.status(200).json({ message: 'Job removed' });
   } catch (error) {
     console.error(error);

@@ -1,5 +1,4 @@
 import express from 'express';
-import mongoose from 'mongoose';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
@@ -28,15 +27,13 @@ dns.setServers(['8.8.8.8', '1.1.1.1']); // Forces Google & Cloudflare public DNS
 const app = express();
 
 // Allow requests from frontend (Vercel or localhost)
-const allowedOrigins = ['http://localhost:5173', 'https://schedulebubble.vercel.app'];
+const allowedOrigins = ['http://localhost:5173', 'https://schedulebubble-two.vercel.app'];
 // Also allow any custom domain by checking if the origin is provided
 app.use(cors({ 
   origin: function (origin, callback) {
     if (!origin || allowedOrigins.includes(origin) || origin.includes('vercel.app')) {
       callback(null, true);
     } else {
-      // For the demo, it's safer to just allow all origins if it reaches here, 
-      // or you can set origin: true to reflect whatever origin asks.
       callback(null, true);
     }
   }, 
@@ -57,26 +54,10 @@ app.use('/api/analytics', analyticsRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/media', mediaRoutes);
 
-// Database Connection
-const connectDB = async () => {
-  try {
-    if (!process.env.DATABASE_URL) {
-      console.warn("WARNING: No DATABASE_URL found in .env. Skipping MongoDB connection for now.");
-      return;
-    }
-    const conn = await mongoose.connect(process.env.DATABASE_URL);
-    console.log(`MongoDB Connected: ${conn.connection.host}`);
-  } catch (error) {
-    console.error(`Error connecting to MongoDB: ${error.message}`);
-    process.exit(1);
-  }
-};
-
 // Start Server
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
-  connectDB();
   console.log(`Server running on port ${PORT}`);
   startPublisherService();
   startInsightsService();
