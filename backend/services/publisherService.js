@@ -99,9 +99,15 @@ export const startPublisherService = () => {
 
             } else if (job.platform === 'facebook') {
               const pageId = profile.platform_account_id; 
-              const pageTokenRes = await axios.get(`https://graph.facebook.com/v19.0/${pageId}?fields=access_token&access_token=${profile.access_token}`);
-              const pageToken = pageTokenRes.data.access_token;
-              if (!pageToken) throw new Error("Could not retrieve Page Access Token.");
+              let pageToken = profile.access_token;
+              try {
+                const pageTokenRes = await axios.get(`https://graph.facebook.com/v19.0/${pageId}?fields=access_token&access_token=${profile.access_token}`);
+                if (pageTokenRes.data && pageTokenRes.data.access_token) {
+                  pageToken = pageTokenRes.data.access_token;
+                }
+              } catch (err) {
+                console.log(`[Facebook] Token exchange failed (might already be a page token). Falling back to provided token. Error: ${err.message}`);
+              }
 
               let fbRes;
               if (hasMedia) {
