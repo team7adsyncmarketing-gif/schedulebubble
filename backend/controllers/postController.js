@@ -145,6 +145,7 @@ export const getPublished = async (req, res) => {
       ...j,
       _id: j.id,
       updatedAt: j.updated_at,
+      scheduledFor: j.updated_at || j.scheduled_for || j.created_at,
       errorMessage: j.error_message,
       post: { ...j.post, _id: j.post.id, mediaUrls: j.post.media_urls }
     })));
