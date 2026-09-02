@@ -1,4 +1,5 @@
 import multer from 'multer';
+import sharp from 'sharp';
 import { supabase } from '../config/supabase.js';
 
 // Setup multer for memory storage
@@ -13,15 +14,35 @@ export const uploadAsset = async (req, res) => {
     if (!req.file) return res.status(400).json({ message: 'No file uploaded' });
     if (!req.user || !req.user.id) return res.status(401).json({ message: 'User context missing' });
 
-    const file = req.file;
-    const fileExt = file.originalname.split('.').pop();
+    let fileBuffer = req.file.buffer;
+    let mimeType = req.file.mimetype;
+    let originalName = req.file.originalname;
+
+    // If it's an image, resize and pad it to 1080x1080 for universal social media compatibility
+    if (mimeType.startsWith('image/') && !mimeType.includes('gif')) {
+      try {
+        fileBuffer = await sharp(req.file.buffer)
+          .resize(1080, 1080, {
+            fit: 'contain',
+            background: { r: 0, g: 0, b: 0, alpha: 1 }
+          })
+          .toFormat('jpeg', { quality: 90 })
+          .toBuffer();
+        mimeType = 'image/jpeg';
+        originalName = originalName.replace(/\.[^/.]+$/, "") + '.jpg';
+      } catch (err) {
+        console.error("Image processing error:", err);
+      }
+    }
+
+    const fileExt = originalName.split('.').pop();
     const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
     const filePath = `${req.user.id}/${fileName}`;
 
     const { data, error } = await supabase.storage
       .from('media')
-      .upload(filePath, file.buffer, {
-        contentType: file.mimetype,
+      .upload(filePath, fileBuffer, {
+        contentType: mimeType,
         upsert: false
       });
 
