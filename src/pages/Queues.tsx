@@ -201,7 +201,7 @@ export default function Queues() {
     <div className="w-full max-w-6xl mx-auto p-4 sm:p-8">
       <div className="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400">
+          <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-500 dark:from-white dark:to-slate-400">
             Publishing Queue
           </h1>
           <p className="text-slate-400 mt-2">Manage your upcoming scheduled posts and drafts.</p>
