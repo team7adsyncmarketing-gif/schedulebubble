@@ -206,7 +206,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
                 <button
                   onClick={handleGoogleLogin}
                   disabled={isGoogleLoading}
-                  className="w-full py-3 px-4 rounded-xl border flex items-center justify-center gap-3 transition-colors mb-6 font-medium hover:bg-white/5"
+                  className="w-full py-3 px-4 rounded-xl border flex items-center justify-center gap-3 transition-colors mb-6 font-medium hover:bg-black/5 dark:hover:bg-white/5"
                   style={{ 
                     borderColor: inputBorder, 
                     background: inputBg,
@@ -331,9 +331,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
                   <motion.button
                     type="submit"
                     disabled={isLoading}
-                    className="w-full py-3.5 rounded-xl font-semibold text-white mt-3 flex items-center justify-center gap-2"
-                    style={{ background: '#0F172A' }}
-                    whileHover={{ scale: 1.02, filter: 'brightness(1.1)' }}
+                    className="w-full py-3.5 rounded-xl font-semibold text-white mt-3 flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-500 transition-colors shadow-sm"
                     whileTap={{ scale: 0.98 }}
                   >
                     {isLoading ? <Loader2 size={18} className="animate-spin" /> : null}

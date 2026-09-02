@@ -10,7 +10,7 @@ export const getAnalyticsSummary = async (req, res) => {
     const { count: publishedCount } = await supabase.from('publish_jobs').select('*', { count: 'exact', head: true }).eq('user_id', req.user.id).eq('status', 'published');
     const { count: failedCount } = await supabase.from('publish_jobs').select('*', { count: 'exact', head: true }).eq('user_id', req.user.id).eq('status', 'failed');
     
-    let successRate = '100%';
+    let successRate = '0%';
     const totalProcessed = (publishedCount || 0) + (failedCount || 0);
     if (totalProcessed > 0) {
       successRate = Math.round(((publishedCount || 0) / totalProcessed) * 100) + '%';
@@ -112,7 +112,7 @@ export const getDashboardData = async (req, res) => {
     res.json({
       platformBreakdown: platformBreakdown.length > 0 ? platformBreakdown : [{ name: 'None', value: 1 }],
       timeline,
-      successRate: totalSuccess + totalFailed > 0 ? Math.round((totalSuccess / (totalSuccess + totalFailed)) * 100) : 100,
+      successRate: totalSuccess + totalFailed > 0 ? Math.round((totalSuccess / (totalSuccess + totalFailed)) * 100) : 0,
     });
   } catch (error) {
     console.error(error);

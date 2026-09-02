@@ -144,7 +144,7 @@ const HeroSection: React.FC<{ onOpenAuth?: (mode: 'login' | 'register', email?: 
               Connected to every platform and tool you use.
             </motion.p>
             <motion.div variants={fadeUp(0.30)} initial="hidden" animate="visible">
-              <div className="flex flex-col sm:flex-row items-center gap-3 w-full max-w-md p-1.5 rounded-full bg-slate-900 dark:bg-slate-800/50 border border-slate-800 dark:border-slate-700 shadow-xl shadow-slate-900/20 dark:shadow-none">
+              <div className="flex flex-col sm:flex-row items-center gap-3 w-full max-w-md p-1.5 rounded-3xl sm:rounded-full bg-slate-900 dark:bg-slate-800/50 border border-slate-800 dark:border-slate-700 shadow-xl shadow-slate-900/20 dark:shadow-none">
                 <input 
                   type="email" 
                   placeholder="name@email.com" 

@@ -364,7 +364,7 @@ export const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children })
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme');
-    const isDarkMode = savedTheme ? savedTheme === 'dark' : true; // Default to dark
+    const isDarkMode = savedTheme ? savedTheme === 'dark' : false; // Default to light
     setIsDark(isDarkMode);
     if (isDarkMode) {
       document.documentElement.classList.add('dark');

@@ -297,7 +297,7 @@ export const IntegrationsPanel = () => {
                     {isConnected ? 'Add Another' : 'Connect Account'}
                   </button>
 
-                  {!isConnected && (platform.id === 'facebook' || platform.id === 'instagram') && (
+                  {(platform.id === 'facebook' || platform.id === 'instagram') && (
                     <button
                       onClick={() => setManualMetaModalOpen(true)}
                       className="w-full sm:w-auto px-5 py-2.5 text-sm font-semibold text-indigo-400 hover:text-indigo-300 bg-indigo-500/10 hover:bg-indigo-500/20 active:bg-indigo-500/30 rounded-xl transition-all duration-300"
@@ -305,7 +305,7 @@ export const IntegrationsPanel = () => {
                       Connect Manually (Token)
                     </button>
                   )}
-                  {!isConnected && platform.id === 'twitter' && (
+                  {platform.id === 'twitter' && (
                     <button
                       onClick={() => setManualTwitterModalOpen(true)}
                       className="w-full sm:w-auto px-5 py-2.5 text-sm font-semibold text-indigo-400 hover:text-indigo-300 bg-indigo-500/10 hover:bg-indigo-500/20 active:bg-indigo-500/30 rounded-xl transition-all duration-300"
@@ -313,7 +313,7 @@ export const IntegrationsPanel = () => {
                       Connect Manually (Token)
                     </button>
                   )}
-                  {!isConnected && platform.id === 'google' && (
+                  {platform.id === 'google' && (
                     <button
                       onClick={() => setManualGoogleModalOpen(true)}
                       className="w-full sm:w-auto px-5 py-2.5 text-sm font-semibold text-indigo-400 hover:text-indigo-300 bg-indigo-500/10 hover:bg-indigo-500/20 active:bg-indigo-500/30 rounded-xl transition-all duration-300"
