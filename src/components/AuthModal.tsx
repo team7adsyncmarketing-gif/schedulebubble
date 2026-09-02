@@ -86,11 +86,18 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
         
         if (error) throw error;
         
-        setSuccessMessage('Account created successfully!');
-        setTimeout(() => {
-          onClose();
-          if (onSuccess) onSuccess();
-        }, 1500);
+        if (data.user && !data.session) {
+          setSuccessMessage('Success! Please check your email and click the link to verify your account.');
+          setTimeout(() => {
+            onClose();
+          }, 4000);
+        } else {
+          setSuccessMessage('Account created successfully!');
+          setTimeout(() => {
+            onClose();
+            if (onSuccess) onSuccess();
+          }, 1500);
+        }
       } else {
         const { data, error } = await supabase.auth.signInWithPassword({
           email: formData.email,
