@@ -70,11 +70,20 @@ export const startPublisherService = () => {
             let primaryMediaUrl = hasMedia ? job.post.media_urls[0] : null;
             const isVideo = primaryMediaUrl && (primaryMediaUrl.match(/\.(mp4|mov|avi|webm)($|\?)/i) || primaryMediaUrl.includes('/video/upload/'));
 
-            if (!isVideo && primaryMediaUrl && primaryMediaUrl.includes('res.cloudinary.com')) {
-              const uploadIndex = primaryMediaUrl.indexOf('/upload/');
-              if (uploadIndex !== -1) {
-                const insertString = '/upload/c_pad,w_1080,h_1080,b_black/';
-                primaryMediaUrl = primaryMediaUrl.substring(0, uploadIndex) + insertString + primaryMediaUrl.substring(uploadIndex + 8);
+            if (!isVideo && primaryMediaUrl) {
+              if (primaryMediaUrl.includes('res.cloudinary.com/')) {
+                // It's already a cloudinary URL, insert transformation if not present
+                if (!primaryMediaUrl.includes('/c_pad')) {
+                  const uploadIndex = primaryMediaUrl.indexOf('/upload/');
+                  if (uploadIndex !== -1) {
+                    const insertString = '/upload/c_pad,w_1080,h_1080,b_black/';
+                    primaryMediaUrl = primaryMediaUrl.substring(0, uploadIndex) + insertString + primaryMediaUrl.substring(uploadIndex + 8);
+                  }
+                }
+              } else {
+                // Use Cloudinary fetch API to dynamically pad any external URL (like Supabase storage)
+                const cloudName = process.env.CLOUDINARY_CLOUD_NAME || 'pbxr6rg1';
+                primaryMediaUrl = `https://res.cloudinary.com/${cloudName}/image/fetch/c_pad,w_1080,h_1080,b_black/${encodeURIComponent(primaryMediaUrl)}`;
               }
             }
 
