@@ -51,8 +51,8 @@ const protect = async (req, res, next) => {
       req.user = profile;
       next();
     } catch (error) {
-      console.error(error);
-      res.status(401).json({ message: 'Not authorized, token failed' });
+      console.error('Auth Middleware Error:', error);
+      res.status(401).json({ message: 'Not authorized', error: error.message || error.toString() });
     }
   } else {
     res.status(401).json({ message: 'Not authorized, no token' });
