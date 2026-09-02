@@ -25,6 +25,7 @@ export const ScheduleCalendar = () => {
   const [posts, setPosts] = useState<ScheduledPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState<string>('');
+  const [viewingJob, setViewingJob] = useState<ScheduledPost | null>(null);
 
   useEffect(() => {
     const fetchPosts = async () => {
@@ -117,7 +118,8 @@ export const ScheduleCalendar = () => {
           return (
             <div 
               key={post._id} 
-              className="group p-6 rounded-3xl border border-slate-800/60 backdrop-blur-2xl hover:border-slate-700/80 transition-all duration-300 shadow-lg flex flex-col md:flex-row gap-6 hover:scale-[1.01] cursor-default"
+              onClick={() => setViewingJob(post)}
+              className="group p-6 rounded-3xl border border-slate-800/60 backdrop-blur-2xl hover:border-slate-700/80 transition-all duration-300 shadow-lg flex flex-col md:flex-row gap-6 hover:scale-[1.01] cursor-pointer"
               style={{ background: 'rgba(13,18,32,0.7)' }}
             >
               <div className="flex-grow">
@@ -159,16 +161,65 @@ export const ScheduleCalendar = () => {
                   )}
                 </div>
               </div>
-              
-              {post.mediaUrls && post.mediaUrls.length > 0 && (
-                <div className="shrink-0 md:w-32 md:h-32 w-full h-48 rounded-xl overflow-hidden border border-slate-700 shadow-inner group-hover:scale-[1.02] transition-transform duration-300">
-                  <img src={post.mediaUrls[0]} alt="Post media" className="w-full h-full object-cover" />
-                </div>
-              )}
             </div>
           );
         })}
       </div>
+
+      {viewingJob && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 sm:p-6 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200" onClick={() => setViewingJob(null)}>
+          <div className="bg-slate-900 border border-slate-700 rounded-3xl p-6 sm:p-8 w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl relative animate-in zoom-in-95 duration-200" onClick={e => e.stopPropagation()}>
+            <button 
+              onClick={() => setViewingJob(null)}
+              className="absolute top-4 right-4 p-2 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white rounded-full transition shadow-md"
+            >
+              <X className="w-5 h-5" />
+            </button>
+            <div className="flex items-center gap-4 mb-6">
+              <div className="flex -space-x-2">
+                {viewingJob.platforms.map((platformId, i) => {
+                  const platform = platformIcons[platformId];
+                  if (!platform) return null;
+                  const Icon = platform.icon;
+                  return (
+                    <div key={`modal-${viewingJob._id}-${platformId}`} className={`w-10 h-10 rounded-full flex items-center justify-center border-2 border-slate-700 bg-slate-800 ${platform.color}`} style={{ zIndex: 10 - i }}>
+                      <Icon className="w-4 h-4" />
+                    </div>
+                  );
+                })}
+              </div>
+              <div>
+                <h3 className="text-xl font-bold text-white capitalize">{viewingJob.platforms.map(p => platformIcons[p]?.icon.name || p).join(', ')}</h3>
+                <p className="text-sm text-slate-400 font-medium">
+                  {viewingJob.status === 'scheduled' ? 'Scheduled' : 'Published'}
+                </p>
+              </div>
+            </div>
+            <div className="mb-6">
+              <p className="text-slate-200 whitespace-pre-wrap leading-relaxed text-[15px]">{viewingJob.content}</p>
+            </div>
+            {viewingJob.mediaUrls && viewingJob.mediaUrls.length > 0 && (
+              <div className="mb-6 space-y-4">
+                {viewingJob.mediaUrls.map((url, i) => (
+                  url.toLowerCase().endsWith('.mp4') ? (
+                    <video key={i} src={url} className="w-full rounded-2xl border border-slate-700/80 shadow-lg" controls />
+                  ) : (
+                    <img key={i} src={url} alt="Attached Media" className="w-full rounded-2xl border border-slate-700/80 shadow-lg" />
+                  )
+                ))}
+              </div>
+            )}
+            <div className="pt-6 border-t border-slate-800/80">
+              <div className="flex items-center gap-2 text-sm text-slate-400 mb-2 font-medium">
+                <Clock className="w-4 h-4 text-indigo-400" />
+                {viewingJob.scheduledFor ? new Date(viewingJob.scheduledFor).toLocaleString(undefined, { 
+                  weekday: 'long', month: 'long', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' 
+                }) : 'No scheduled date'}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

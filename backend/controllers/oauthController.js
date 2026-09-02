@@ -239,14 +239,28 @@ export const getConnectedAccounts = async (req, res) => {
     if (error) throw error;
     
     // Map to old schema keys for frontend compatibility
-    res.status(200).json(accounts.map(a => ({
+    const mappedAccounts = accounts.map(a => ({
       _id: a.id,
       platform: a.platform,
       profileId: a.platform_account_id,
       profileName: a.platform_username,
       expiresAt: a.expires_at,
       createdAt: a.created_at
-    })));
+    }));
+
+    // Inject System Telegram if env vars exist and user hasn't explicitly connected one
+    const hasTelegram = mappedAccounts.some(a => a.platform === 'telegram');
+    if (!hasTelegram && process.env.TELEGRAM_BOT_TOKEN && process.env.TELEGRAM_CHAT_ID) {
+      mappedAccounts.push({
+        _id: 'system_telegram',
+        platform: 'telegram',
+        profileId: process.env.TELEGRAM_CHAT_ID,
+        profileName: `System Configured`,
+        createdAt: new Date().toISOString()
+      });
+    }
+
+    res.status(200).json(mappedAccounts);
   } catch (error) {
     res.status(500).json({ message: 'Server error fetching connected accounts' });
   }

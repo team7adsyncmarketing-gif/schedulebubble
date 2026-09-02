@@ -213,7 +213,7 @@ function App() {
                 <NavThemeToggle />
                 <button
                   onClick={() => { setAuthMode('login'); setIsAuthModalOpen(true); }}
-                  className="hidden sm:flex px-4 py-1.5 rounded-full text-sm font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 dark:text-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 transition-colors"
+                  className="flex px-4 py-1.5 rounded-full text-sm font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 dark:text-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 transition-colors"
                 >
                   Log In
                 </button>

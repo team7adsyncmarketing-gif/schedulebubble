@@ -382,7 +382,7 @@ export const ContentComposer = () => {
       <div
         className="w-full max-w-4xl mx-auto rounded-3xl border border-slate-200 dark:border-slate-800/80 backdrop-blur-2xl shadow-2xl overflow-hidden hover:border-indigo-500/20 transition-all duration-300 bg-white/80 dark:bg-[rgba(13,18,32,0.7)]"
       >
-        <div className="p-8">
+        <div className="p-5 sm:p-8">
           <h2 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-500 dark:from-white dark:to-slate-400 mb-6 tracking-tight">Create Post</h2>
           
           <form onSubmit={handleSubmit}>
