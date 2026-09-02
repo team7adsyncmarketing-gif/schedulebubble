@@ -53,8 +53,8 @@ export const createPost = async (req, res) => {
 
     res.status(201).json(post);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Server error creating post' });
+    console.error('createPost error:', error);
+    res.status(500).json({ message: 'Server error creating post', error: error.message || error.toString() });
   }
 };
 
@@ -94,11 +94,12 @@ export const getQueue = async (req, res) => {
       ...j,
       _id: j.id,
       scheduledFor: j.scheduled_for,
+      errorMessage: j.error_message,
       post: { ...j.post, _id: j.post.id, mediaUrls: j.post.media_urls }
     })));
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Server error fetching queue' });
+    console.error('getQueue error:', error);
+    res.status(500).json({ message: 'Server error fetching queue', error: error.message || error.toString() });
   }
 };
 
@@ -118,11 +119,12 @@ export const getDrafts = async (req, res) => {
     res.status(200).json(drafts.map(j => ({
       ...j,
       _id: j.id,
+      errorMessage: j.error_message,
       post: { ...j.post, _id: j.post.id, mediaUrls: j.post.media_urls }
     })));
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Server error fetching drafts' });
+    console.error('getDrafts error:', error);
+    res.status(500).json({ message: 'Server error fetching drafts', error: error.message || error.toString() });
   }
 };
 
@@ -143,11 +145,12 @@ export const getPublished = async (req, res) => {
       ...j,
       _id: j.id,
       updatedAt: j.updated_at,
+      errorMessage: j.error_message,
       post: { ...j.post, _id: j.post.id, mediaUrls: j.post.media_urls }
     })));
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Server error fetching published posts' });
+    console.error('getPublished error:', error);
+    res.status(500).json({ message: 'Server error fetching published posts', error: error.message || error.toString() });
   }
 };
 
