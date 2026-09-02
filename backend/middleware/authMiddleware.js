@@ -45,7 +45,7 @@ const protect = async (req, res, next) => {
         if (insertError) throw new Error('Failed to auto-create profile');
         profile = newProfile;
       } else if (profileError || !profile) {
-        throw new Error('Profile fetch error');
+        throw new Error(`Profile fetch error: ${profileError ? profileError.message || profileError.code : 'No profile returned'}`);
       }
 
       req.user = profile;
