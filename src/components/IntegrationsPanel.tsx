@@ -34,6 +34,10 @@ export const IntegrationsPanel = () => {
   const [googleAccountId, setGoogleAccountId] = useState('');
   const [googleLocationId, setGoogleLocationId] = useState('');
 
+  const [manualLinkedinModalOpen, setManualLinkedinModalOpen] = useState(false);
+  const [linkedinToken, setLinkedinToken] = useState('');
+  const [linkedinProfileId, setLinkedinProfileId] = useState('');
+
   const fetchAccounts = async () => {
     try {
       const token = localStorage.getItem('token');
@@ -147,6 +151,33 @@ export const IntegrationsPanel = () => {
     }
   };
 
+  const handleManualLinkedinConnect = async () => {
+    if (!linkedinToken) return alert('Token is required');
+    const token = localStorage.getItem('token');
+    try {
+      const response = await fetch(`https://schedulebubble-zjof.onrender.com/api/oauth/linkedin-manual`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        },
+        body: JSON.stringify({ accessToken: linkedinToken, profileId: linkedinProfileId }),
+        credentials: 'include',
+      });
+      if (response.ok) {
+        setManualLinkedinModalOpen(false);
+        setLinkedinToken('');
+        setLinkedinProfileId('');
+        fetchAccounts();
+      } else {
+        const data = await response.json();
+        alert(data.message || 'Failed to connect manually');
+      }
+    } catch (e) {
+      alert('Error connecting manually');
+    }
+  };
+
   const handleConnect = async (platformId: string) => {
     const token = localStorage.getItem('token');
 
@@ -175,7 +206,7 @@ export const IntegrationsPanel = () => {
       return;
     }
 
-    // Redirect to real OAuth flow for X and Meta
+    // Redirect to real OAuth flow for X, Meta, Google, LinkedIn
     if (platformId === 'twitter') {
       if (!token) return alert('Please log in first');
       window.location.href = `https://schedulebubble-zjof.onrender.com/api/oauth/x?token=${token}`;
@@ -184,6 +215,16 @@ export const IntegrationsPanel = () => {
     if (platformId === 'facebook' || platformId === 'instagram') {
       if (!token) return alert('Please log in first');
       window.location.href = `https://schedulebubble-zjof.onrender.com/api/oauth/meta?token=${token}`;
+      return;
+    }
+    if (platformId === 'google') {
+      if (!token) return alert('Please log in first');
+      window.location.href = `https://schedulebubble-zjof.onrender.com/api/oauth/google?token=${token}`;
+      return;
+    }
+    if (platformId === 'linkedin') {
+      if (!token) return alert('Please log in first');
+      window.location.href = `https://schedulebubble-zjof.onrender.com/api/oauth/linkedin?token=${token}`;
       return;
     }
 
@@ -316,6 +357,14 @@ export const IntegrationsPanel = () => {
                   {platform.id === 'google' && (
                     <button
                       onClick={() => setManualGoogleModalOpen(true)}
+                      className="w-full sm:w-auto px-5 py-2.5 text-sm font-semibold text-indigo-400 hover:text-indigo-300 bg-indigo-500/10 hover:bg-indigo-500/20 active:bg-indigo-500/30 rounded-xl transition-all duration-300"
+                    >
+                      Connect Manually (Token)
+                    </button>
+                  )}
+                  {platform.id === 'linkedin' && (
+                    <button
+                      onClick={() => setManualLinkedinModalOpen(true)}
                       className="w-full sm:w-auto px-5 py-2.5 text-sm font-semibold text-indigo-400 hover:text-indigo-300 bg-indigo-500/10 hover:bg-indigo-500/20 active:bg-indigo-500/30 rounded-xl transition-all duration-300"
                     >
                       Connect Manually (Token)
@@ -476,6 +525,50 @@ export const IntegrationsPanel = () => {
                 </button>
                 <button
                   onClick={handleManualGoogleConnect}
+                  className="flex-1 py-2 bg-indigo-600 text-white font-semibold rounded-xl hover:bg-indigo-500 transition shadow-[0_0_15px_rgba(79,70,229,0.3)]"
+                >
+                  Save / Connect
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {manualLinkedinModalOpen && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="bg-slate-900 border border-slate-700 rounded-3xl p-6 w-full max-w-md shadow-2xl">
+            <h3 className="text-xl font-bold text-white mb-4">Connect LinkedIn Manually</h3>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-400 mb-2">LinkedIn Access Token</label>
+                <input
+                  type="text"
+                  value={linkedinToken}
+                  onChange={e => setLinkedinToken(e.target.value)}
+                  className="w-full bg-slate-800 text-white border border-slate-700 rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-indigo-500 transition-colors"
+                  placeholder="AQU..."
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-400 mb-2">Profile ID (Optional)</label>
+                <input
+                  type="text"
+                  value={linkedinProfileId}
+                  onChange={e => setLinkedinProfileId(e.target.value)}
+                  className="w-full bg-slate-800 text-white border border-slate-700 rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-indigo-500 transition-colors"
+                  placeholder="URN / Profile ID"
+                />
+              </div>
+              <div className="flex gap-3 mt-6">
+                <button
+                  onClick={() => setManualLinkedinModalOpen(false)}
+                  className="flex-1 py-2 bg-slate-800 text-white font-semibold rounded-xl hover:bg-slate-700 transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleManualLinkedinConnect}
                   className="flex-1 py-2 bg-indigo-600 text-white font-semibold rounded-xl hover:bg-indigo-500 transition shadow-[0_0_15px_rgba(79,70,229,0.3)]"
                 >
                   Save / Connect

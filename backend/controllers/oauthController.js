@@ -72,6 +72,135 @@ export const handleXCallback = async (req, res) => {
   }
 };
 
+// ─── GOOGLE OAUTH ──────────────────────────────────────────────────────
+
+export const connectGoogle = async (req, res) => {
+  try {
+    const state = Math.random().toString(36).substring(7);
+    oauthStateCache[state] = { userId: req.user.id };
+
+    const scopes = 'https://www.googleapis.com/auth/business.manage';
+    const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${process.env.GOOGLE_CLIENT_ID}&redirect_uri=${process.env.GOOGLE_REDIRECT_URI}&response_type=code&scope=${scopes}&state=${state}&access_type=offline&prompt=consent`;
+
+    res.redirect(googleAuthUrl);
+  } catch (error) {
+    console.error('Google connect error:', error);
+    res.status(500).json({ message: 'Error initiating Google OAuth' });
+  }
+};
+
+export const handleGoogleCallback = async (req, res) => {
+  const { state, code } = req.query;
+
+  try {
+    const session = oauthStateCache[state];
+    if (!session) {
+      return res.status(400).send('Invalid state or session expired.');
+    }
+
+    const tokenResponse = await axios.post('https://oauth2.googleapis.com/token', {
+      client_id: process.env.GOOGLE_CLIENT_ID,
+      client_secret: process.env.GOOGLE_CLIENT_SECRET,
+      code,
+      redirect_uri: process.env.GOOGLE_REDIRECT_URI,
+      grant_type: 'authorization_code'
+    });
+
+    const { access_token, refresh_token, expires_in } = tokenResponse.data;
+    
+    // Fetch user info or just use a default name for now, as GMB accounts fetch requires another call
+    // For simplicity, we just save the token and a placeholder ID if we don't fetch locations right away
+    // Ideally, we'd fetch locations here, but for now we'll just save the token.
+    const expiresAt = new Date(Date.now() + expires_in * 1000).toISOString();
+
+    await supabase
+      .from('social_profiles')
+      .upsert({
+        user_id: session.userId,
+        platform: 'google',
+        platform_account_id: 'gmb_account_placeholder',
+        platform_username: 'Google Business Profile',
+        access_token: access_token,
+        refresh_token: refresh_token || null,
+        expires_at: expiresAt,
+        updated_at: new Date().toISOString()
+      }, { onConflict: 'user_id, platform, platform_account_id' });
+
+    delete oauthStateCache[state];
+    res.redirect('https://schedulebubble-two.vercel.app/dashboard');
+  } catch (error) {
+    console.error('Google callback error:', error.response?.data || error.message);
+    res.status(500).send('Error authenticating with Google');
+  }
+};
+
+// ─── LINKEDIN OAUTH ────────────────────────────────────────────────────
+
+export const connectLinkedIn = async (req, res) => {
+  try {
+    const state = Math.random().toString(36).substring(7);
+    oauthStateCache[state] = { userId: req.user.id };
+
+    const scopes = 'w_member_social r_liteprofile';
+    const linkedinAuthUrl = `https://www.linkedin.com/oauth/v2/authorization?response_type=code&client_id=${process.env.LINKEDIN_CLIENT_ID}&redirect_uri=http://localhost:5000/api/oauth/linkedin/callback&state=${state}&scope=${scopes}`;
+
+    res.redirect(linkedinAuthUrl);
+  } catch (error) {
+    console.error('LinkedIn connect error:', error);
+    res.status(500).json({ message: 'Error initiating LinkedIn OAuth' });
+  }
+};
+
+export const handleLinkedInCallback = async (req, res) => {
+  const { state, code } = req.query;
+
+  try {
+    const session = oauthStateCache[state];
+    if (!session) {
+      return res.status(400).send('Invalid state or session expired.');
+    }
+
+    const tokenParams = new URLSearchParams();
+    tokenParams.append('grant_type', 'authorization_code');
+    tokenParams.append('code', code);
+    tokenParams.append('redirect_uri', 'http://localhost:5000/api/oauth/linkedin/callback');
+    tokenParams.append('client_id', process.env.LINKEDIN_CLIENT_ID);
+    tokenParams.append('client_secret', process.env.LINKEDIN_CLIENT_SECRET);
+
+    const tokenResponse = await axios.post('https://www.linkedin.com/oauth/v2/accessToken', tokenParams, {
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+    });
+
+    const { access_token, expires_in } = tokenResponse.data;
+    
+    // Fetch profile
+    const profileResponse = await axios.get('https://api.linkedin.com/v2/me', {
+      headers: { 'Authorization': `Bearer ${access_token}` }
+    });
+    
+    const profile = profileResponse.data;
+    const expiresAt = new Date(Date.now() + expires_in * 1000).toISOString();
+
+    await supabase
+      .from('social_profiles')
+      .upsert({
+        user_id: session.userId,
+        platform: 'linkedin',
+        platform_account_id: profile.id,
+        platform_username: `${profile.localizedFirstName} ${profile.localizedLastName}`,
+        access_token: access_token,
+        expires_at: expiresAt,
+        updated_at: new Date().toISOString()
+      }, { onConflict: 'user_id, platform, platform_account_id' });
+
+    delete oauthStateCache[state];
+    res.redirect('https://schedulebubble-two.vercel.app/dashboard');
+  } catch (error) {
+    console.error('LinkedIn callback error:', error.response?.data || error.message);
+    res.status(500).send('Error authenticating with LinkedIn');
+  }
+};
+
 // ─── META (FACEBOOK/INSTAGRAM) OAUTH ─────────────────────────────────
 
 export const connectMeta = async (req, res) => {
@@ -226,6 +355,26 @@ export const connectGoogleManual = async (req, res) => {
     res.status(200).json({ message: 'Google Business Profile Connected Manually' });
   } catch (err) {
     res.status(500).json({ message: 'Error saving manual Google token' });
+  }
+};
+
+export const connectLinkedinManual = async (req, res) => {
+  try {
+    const { accessToken, profileId } = req.body;
+    if (!accessToken) return res.status(400).json({ message: 'Access Token is required' });
+
+    await supabase.from('social_profiles').upsert({
+      user_id: req.user.id,
+      platform: 'linkedin',
+      platform_account_id: profileId || 'manual-linkedin',
+      platform_username: `Manual LinkedIn`,
+      access_token: accessToken,
+      updated_at: new Date().toISOString()
+    }, { onConflict: 'user_id, platform, platform_account_id' });
+
+    res.status(200).json({ message: 'LinkedIn Connected Manually' });
+  } catch (err) {
+    res.status(500).json({ message: 'Error saving manual LinkedIn token' });
   }
 };
 

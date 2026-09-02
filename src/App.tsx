@@ -25,10 +25,10 @@ const NavPill: React.FC<{ label: string; active?: boolean; onClick?: () => void 
     <button
       onClick={onClick}
       className={`px-4 py-1.5 text-sm font-medium rounded-full transition-all duration-200 hover:scale-[1.04] active:scale-95 ${active
-          ? 'bg-indigo-600/20 text-indigo-500 dark:text-indigo-300 border border-indigo-500/30 shadow-[0_0_12px_rgba(99,102,241,0.15)]'
-          : isDark
-            ? 'text-slate-400 hover:text-white hover:bg-slate-800/70'
-            : 'text-slate-500 hover:text-slate-900 hover:bg-slate-200/70'
+        ? 'bg-indigo-600/20 text-indigo-500 dark:text-indigo-300 border border-indigo-500/30 shadow-[0_0_12px_rgba(99,102,241,0.15)]'
+        : isDark
+          ? 'text-slate-400 hover:text-white hover:bg-slate-800/70'
+          : 'text-slate-500 hover:text-slate-900 hover:bg-slate-200/70'
         }`}
     >
       {label}
@@ -46,8 +46,8 @@ const NavThemeToggle: React.FC = () => {
       onClick={toggleTheme}
       title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
       className={`flex items-center justify-center w-9 h-9 rounded-full transition-all duration-300 hover:scale-110 active:scale-95 ${isDark
-          ? 'bg-slate-800/70 border border-slate-700/60 text-slate-400 hover:text-yellow-300'
-          : 'bg-white border border-slate-200 text-slate-500 hover:text-indigo-600 shadow-sm'
+        ? 'bg-slate-800/70 border border-slate-700/60 text-slate-400 hover:text-yellow-300'
+        : 'bg-white border border-slate-200 text-slate-500 hover:text-indigo-600 shadow-sm'
         }`}
     >
       {isDark ? <Sun size={15} strokeWidth={2} /> : <Moon size={15} strokeWidth={2} />}
@@ -73,7 +73,7 @@ function App() {
 
     const getInitialSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
-      
+
       if (session) {
         localStorage.setItem('token', session.access_token);
         if (mounted) fetchUserProfile(session.access_token);
@@ -262,26 +262,26 @@ function App() {
       </main>
 
       {isAuthenticated && (
-        <ProfileModal 
-          isOpen={isProfileModalOpen} 
-          onClose={() => setIsProfileModalOpen(false)} 
-          user={user} 
-          onUserUpdate={(updatedUser) => setUser(updatedUser)} 
+        <ProfileModal
+          isOpen={isProfileModalOpen}
+          onClose={() => setIsProfileModalOpen(false)}
+          user={user}
+          onUserUpdate={(updatedUser) => setUser(updatedUser)}
           onLogout={() => {
             setIsProfileModalOpen(false);
             handleLogout();
-          }} 
+          }}
         />
       )}
 
       {!isAuthenticated && (
-        <AuthModal 
-          isOpen={isAuthModalOpen} 
-          onClose={() => setIsAuthModalOpen(false)} 
+        <AuthModal
+          isOpen={isAuthModalOpen}
+          onClose={() => setIsAuthModalOpen(false)}
           initialMode={authMode}
           initialEmail={authEmail}
-          isDark={true} 
-          onSuccess={() => window.location.reload()} 
+          isDark={true}
+          onSuccess={() => window.location.reload()}
         />
       )}
     </AppLayout>
