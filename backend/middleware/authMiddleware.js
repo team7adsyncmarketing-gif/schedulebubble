@@ -23,14 +23,29 @@ const protect = async (req, res, next) => {
       }
 
       // Fetch profile from our profiles table
-      const { data: profile, error: profileError } = await supabase
+      let { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', user.id)
         .single();
 
-      if (profileError || !profile) {
-        throw new Error('Profile not found');
+      // If profile doesn't exist (PGRST116), create it automatically
+      if (profileError && profileError.code === 'PGRST116') {
+        const { data: newProfile, error: insertError } = await supabase
+          .from('profiles')
+          .insert({
+            id: user.id,
+            email: user.email,
+            name: user.user_metadata?.full_name || user.email.split('@')[0],
+            profile_picture: user.user_metadata?.avatar_url || ''
+          })
+          .select()
+          .single();
+          
+        if (insertError) throw new Error('Failed to auto-create profile');
+        profile = newProfile;
+      } else if (profileError || !profile) {
+        throw new Error('Profile fetch error');
       }
 
       req.user = profile;
