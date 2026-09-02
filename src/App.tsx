@@ -209,17 +209,17 @@ function App() {
                 </button>
               </div>
             ) : (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5 sm:gap-2">
                 <NavThemeToggle />
                 <button
                   onClick={() => { setAuthMode('login'); setIsAuthModalOpen(true); }}
-                  className="flex px-4 py-1.5 rounded-full text-sm font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 dark:text-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 transition-colors"
+                  className="flex px-3 sm:px-4 py-1.5 rounded-full text-xs sm:text-sm font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 dark:text-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 transition-colors whitespace-nowrap"
                 >
                   Log In
                 </button>
                 <button
                   onClick={() => { setAuthMode('register'); setIsAuthModalOpen(true); }}
-                  className="px-4 py-1.5 rounded-full text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-500 transition-colors shadow-sm"
+                  className="px-3 sm:px-4 py-1.5 rounded-full text-xs sm:text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-500 transition-colors shadow-sm whitespace-nowrap"
                 >
                   Start For Free
                 </button>

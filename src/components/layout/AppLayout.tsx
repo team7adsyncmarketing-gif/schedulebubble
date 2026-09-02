@@ -146,7 +146,7 @@ const TrackSystem: React.FC = () => {
 const AdsyncLogo: React.FC = () => {
   return (
     <div
-      className="absolute left-1/2 top-[85%] md:left-[66%] md:top-[52%] max-md:-translate-x-1/2 max-md:-translate-y-1/2 md:-translate-x-1/2 md:-translate-y-1/2 scale-75 md:scale-100 transition-all duration-500"
+      className="absolute hidden md:block md:left-[66%] md:top-[52%] md:-translate-x-1/2 md:-translate-y-1/2 scale-75 md:scale-100 transition-all duration-500"
       style={{
         zIndex: 5,
       }}
