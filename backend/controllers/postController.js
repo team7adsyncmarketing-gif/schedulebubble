@@ -39,7 +39,7 @@ export const createPost = async (req, res) => {
       user_id: req.user.id,
       post_id: post.id,
       platform: dest.platform,
-      social_profile_id: dest.profileId || null,
+      social_profile_id: (dest.profileId && dest.profileId !== 'system_telegram') ? dest.profileId : null,
       status: jobStatus,
       scheduled_for: finalScheduledFor,
     }));
