@@ -205,8 +205,9 @@ export const startPublisherService = () => {
             await supabase.from('publish_jobs').update({ status: 'published', error_message: null, platform_post_id: job.platform_post_id || null, updated_at: new Date().toISOString() }).eq('id', job.id);
             console.log(`[Publisher Service] ✅ Successfully published job ID: ${job.id}`);
           } catch (jobError) {
-            await supabase.from('publish_jobs').update({ status: 'failed', error_message: jobError.message || 'Unknown error', updated_at: new Date().toISOString() }).eq('id', job.id);
-            console.error(`[Publisher Service] ❌ Failed to publish job ID: ${job.id}`);
+            const detailedError = jobError.response?.data?.error?.message || jobError.message || 'Unknown error';
+            await supabase.from('publish_jobs').update({ status: 'failed', error_message: detailedError, updated_at: new Date().toISOString() }).eq('id', job.id);
+            console.error(`[Publisher Service] ❌ Failed to publish job ID: ${job.id}. Error: ${detailedError}`);
           }
         }
       }
