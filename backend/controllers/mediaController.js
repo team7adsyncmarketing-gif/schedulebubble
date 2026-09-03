@@ -43,7 +43,7 @@ export const uploadAsset = async (req, res) => {
     const arrayBuffer = fileBuffer.buffer.slice(fileBuffer.byteOffset, fileBuffer.byteOffset + fileBuffer.byteLength);
 
     const { data, error } = await supabase.storage
-      .from('media')
+      .from('media_assets')
       .upload(filePath, arrayBuffer, {
         contentType: mimeType,
         upsert: false
@@ -55,7 +55,7 @@ export const uploadAsset = async (req, res) => {
     }
 
     const { data: { publicUrl } } = supabase.storage
-      .from('media')
+      .from('media_assets')
       .getPublicUrl(filePath);
 
     // Save to Postgres (Wait, do we have a media table? No, media_urls is stored in posts. But this route implies a MediaAsset table. Let's create it in Postgres too, or just return the URL).
@@ -133,10 +133,10 @@ export const deleteAsset = async (req, res) => {
 
     // Try to remove from Supabase Storage
     if (asset.file_url && asset.file_url.includes('supabase.co')) {
-      const parts = asset.file_url.split('/media/');
+      const parts = asset.file_url.split('/media_assets/');
       if (parts.length > 1) {
         const filePath = parts[1];
-        await supabase.storage.from('media').remove([filePath]);
+        await supabase.storage.from('media_assets').remove([filePath]);
       }
     }
 
