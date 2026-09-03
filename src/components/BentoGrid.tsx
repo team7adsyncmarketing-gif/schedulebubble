@@ -307,6 +307,52 @@ export const InteractiveBentoGrid: React.FC = () => {
           </div>
         </BentoCard>
 
+        {/* Fill the bottom right empty space */}
+        <BentoCard
+          title="AI Autopilot"
+          description="Generate highly converting captions and auto-schedule to your peak engagement slots instantly."
+        >
+          <div className="w-full h-48 -ml-4 mt-auto relative flex items-center justify-center">
+            {/* Animated glowing orb */}
+            <motion.div 
+              className="absolute w-32 h-32 rounded-full bg-gradient-to-tr from-fuchsia-500 via-purple-500 to-cyan-500 blur-2xl opacity-40 dark:opacity-50"
+              animate={{ 
+                scale: [1, 1.2, 1],
+                rotate: [0, 180, 360]
+              }}
+              transition={{
+                duration: 10,
+                repeat: Infinity,
+                ease: "linear"
+              }}
+            />
+            
+            {/* Floating UI elements */}
+            <div className="relative z-10 w-full max-w-[80%] flex flex-col gap-3">
+              <motion.div 
+                className="bg-white/90 dark:bg-neutral-800/90 backdrop-blur-xl p-4 rounded-2xl shadow-xl border border-white/50 dark:border-neutral-700/50"
+                animate={{ y: [0, -6, 0] }}
+                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+              >
+                <div className="flex gap-2 items-center mb-2.5">
+                  <div className="w-5 h-5 rounded-full bg-gradient-to-br from-fuchsia-500 to-purple-600 shadow-sm" />
+                  <div className="h-2 w-20 bg-neutral-200 dark:bg-neutral-700 rounded-full" />
+                </div>
+                <div className="h-1.5 w-full bg-neutral-100 dark:bg-neutral-700/50 rounded-full mb-1.5" />
+                <div className="h-1.5 w-4/5 bg-neutral-100 dark:bg-neutral-700/50 rounded-full" />
+              </motion.div>
+              
+              <motion.button 
+                className="self-end bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold px-5 py-2.5 rounded-xl shadow-lg shadow-indigo-500/30 flex items-center gap-1.5 transition-colors"
+                animate={{ y: [0, 4, 0] }}
+                transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
+              >
+                Auto-Schedule <span className="text-[10px]">✨</span>
+              </motion.button>
+            </div>
+          </div>
+        </BentoCard>
+
       </motion.div>
     </div>
   );
