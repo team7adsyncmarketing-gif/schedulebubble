@@ -39,16 +39,19 @@ export const uploadAsset = async (req, res) => {
     const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
     const filePath = `${req.user.id}/${fileName}`;
 
+    // Convert Buffer to ArrayBuffer for reliable cross-platform fetch in Supabase storage-js
+    const arrayBuffer = fileBuffer.buffer.slice(fileBuffer.byteOffset, fileBuffer.byteOffset + fileBuffer.byteLength);
+
     const { data, error } = await supabase.storage
       .from('media')
-      .upload(filePath, fileBuffer, {
+      .upload(filePath, arrayBuffer, {
         contentType: mimeType,
         upsert: false
       });
 
     if (error) {
       console.error("Supabase storage error:", error);
-      return res.status(500).json({ message: 'Failed to upload image to Supabase' });
+      return res.status(500).json({ message: 'Failed to upload image to Supabase', details: error.message || error });
     }
 
     const { data: { publicUrl } } = supabase.storage
