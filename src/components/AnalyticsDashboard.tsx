@@ -318,21 +318,33 @@ export const AnalyticsDashboard = () => {
         const [analyticsRes, queueRes, accountsRes] = await Promise.all([
           fetch('https://schedulebubble.onrender.com/api/analytics/summary', { headers, credentials: 'include' }),
           fetch('https://schedulebubble.onrender.com/api/posts/queue', { headers, credentials: 'include' }),
-          fetch('https://schedulebubble.onrender.com/api/oauth/connected', { headers, credentials: 'include' })
+          fetch('https://schedulebubble.onrender.com/api/oauth/accounts', { headers, credentials: 'include' })
         ]);
         
-        if (analyticsRes.ok) setData(await analyticsRes.json());
+        if (analyticsRes.ok) {
+          const result = await analyticsRes.json().catch(() => null);
+          if (result) setData(result);
+        }
         
         if (queueRes.ok) {
-          const queue = await queueRes.json();
-          // Sort by scheduledAt ascending so the most imminent is first
-          const sorted = queue.sort((a: any, b: any) => new Date(a.scheduledAt).getTime() - new Date(b.scheduledAt).getTime());
-          setQueuedPosts(sorted);
+          const queue = await queueRes.json().catch(() => null);
+          if (Array.isArray(queue)) {
+            const mappedQueue = queue.map(job => ({
+              id: job.id,
+              content: job.post?.content || '',
+              platforms: [job.platform],
+              scheduledAt: job.scheduledFor
+            }));
+            const sorted = mappedQueue.sort((a, b) => new Date(a.scheduledAt).getTime() - new Date(b.scheduledAt).getTime());
+            setQueuedPosts(sorted);
+          }
         }
         
         if (accountsRes.ok) {
-           const accs = await accountsRes.json();
-           setConnectedAccounts(accs.map((a: any) => a.provider?.toLowerCase()));
+           const accs = await accountsRes.json().catch(() => null);
+           if (Array.isArray(accs)) {
+             setConnectedAccounts(accs.map(a => a.platform?.toLowerCase() || a.provider?.toLowerCase()));
+           }
         }
       } catch (err) {
         console.error('Failed to fetch dashboard data', err);
