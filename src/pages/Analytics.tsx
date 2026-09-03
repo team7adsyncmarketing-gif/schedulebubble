@@ -96,23 +96,30 @@ export default function Analytics() {
         <div className="lg:col-span-2 bg-white/80 dark:bg-slate-900/60 backdrop-blur-xl border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-lg min-h-[400px] transition-colors">
           <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-6">Publishing Timeline (Last 30 Days)</h3>
           <div className="w-full h-[300px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={data?.timeline || []}>
-                <CartesianGrid strokeDasharray="3 3" stroke={isDark ? '#334155' : '#e2e8f0'} vertical={false} />
-                <XAxis dataKey="date" stroke={isDark ? '#94a3b8' : '#64748b'} fontSize={12} tickLine={false} axisLine={false} />
-                <YAxis stroke={isDark ? '#94a3b8' : '#64748b'} fontSize={12} tickLine={false} axisLine={false} />
-                <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: isDark ? '#0f172a' : '#ffffff', 
-                    border: `1px solid ${isDark ? '#334155' : '#e2e8f0'}`, 
-                    borderRadius: '12px',
-                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
-                  }}
-                  itemStyle={{ color: isDark ? '#e2e8f0' : '#1e293b' }}
-                />
-                <Line type="monotone" dataKey="posts" stroke="#6366f1" strokeWidth={3} dot={{ fill: '#6366f1', strokeWidth: 2, r: 4 }} activeDot={{ r: 6, fill: '#818cf8' }} />
-              </LineChart>
-            </ResponsiveContainer>
+            {(!data?.timeline || data.timeline.length === 0) ? (
+              <div className="w-full h-full flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-slate-200 dark:border-slate-800 border-dashed">
+                <Activity className="w-8 h-8 mb-3 opacity-50" />
+                <p>No publishing data available yet.</p>
+              </div>
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={data.timeline}>
+                  <CartesianGrid strokeDasharray="3 3" stroke={isDark ? '#334155' : '#e2e8f0'} vertical={false} />
+                  <XAxis dataKey="date" stroke={isDark ? '#94a3b8' : '#64748b'} fontSize={12} tickLine={false} axisLine={false} />
+                  <YAxis stroke={isDark ? '#94a3b8' : '#64748b'} fontSize={12} tickLine={false} axisLine={false} />
+                  <Tooltip 
+                    contentStyle={{ 
+                      backgroundColor: isDark ? '#0f172a' : '#ffffff', 
+                      border: `1px solid ${isDark ? '#334155' : '#e2e8f0'}`, 
+                      borderRadius: '12px',
+                      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
+                    }}
+                    itemStyle={{ color: isDark ? '#e2e8f0' : '#1e293b' }}
+                  />
+                  <Line type="monotone" dataKey="posts" stroke="#6366f1" strokeWidth={3} dot={{ fill: '#6366f1', strokeWidth: 2, r: 4 }} activeDot={{ r: 6, fill: '#818cf8' }} />
+                </LineChart>
+              </ResponsiveContainer>
+            )}
           </div>
         </div>
 
