@@ -27,7 +27,7 @@ export const MediaLibrary: React.FC = () => {
         return;
       }
 
-      const res = await fetch('https://schedulebubble-zjof.onrender.com/api/media', {
+      const res = await fetch('https://schedulebubble.onrender.com/api/media', {
         headers: {
           'Authorization': `Bearer ${token}`
         },
@@ -69,7 +69,7 @@ export const MediaLibrary: React.FC = () => {
         return;
       }
 
-      const res = await fetch('https://schedulebubble-zjof.onrender.com/api/media/upload', {
+      const res = await fetch('https://schedulebubble.onrender.com/api/media/upload', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -101,7 +101,7 @@ export const MediaLibrary: React.FC = () => {
       const token = localStorage.getItem('token');
       if (!token) return;
 
-      const res = await fetch(`https://schedulebubble-zjof.onrender.com/api/media/${id}`, {
+      const res = await fetch(`https://schedulebubble.onrender.com/api/media/${id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -171,7 +171,7 @@ export const MediaLibrary: React.FC = () => {
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {assets.map((asset) => {
-            const imageUrl = asset.fileUrl.startsWith('http') ? asset.fileUrl : `https://schedulebubble-zjof.onrender.com${asset.fileUrl.startsWith('/') ? '' : '/'}${asset.fileUrl}`;
+            const imageUrl = asset.fileUrl.startsWith('http') ? asset.fileUrl : `https://schedulebubble.onrender.com${asset.fileUrl.startsWith('/') ? '' : '/'}${asset.fileUrl}`;
             return (
               <div 
                 key={asset._id} 
@@ -252,14 +252,14 @@ export const MediaLibrary: React.FC = () => {
               
               {previewAsset.fileUrl.includes('.mp4') || previewAsset.fileUrl.includes('.mov') || previewAsset.fileUrl.includes('.webm') || previewAsset.fileUrl.includes('/video/') ? (
                 <video 
-                  src={previewAsset.fileUrl.startsWith('http') ? previewAsset.fileUrl : `https://schedulebubble-zjof.onrender.com${previewAsset.fileUrl.startsWith('/') ? '' : '/'}${previewAsset.fileUrl}`}
+                  src={previewAsset.fileUrl.startsWith('http') ? previewAsset.fileUrl : `https://schedulebubble.onrender.com${previewAsset.fileUrl.startsWith('/') ? '' : '/'}${previewAsset.fileUrl}`}
                   className="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl pointer-events-auto"
                   controls
                   autoPlay
                 />
               ) : (
                 <img 
-                  src={previewAsset.fileUrl.startsWith('http') ? previewAsset.fileUrl : `https://schedulebubble-zjof.onrender.com${previewAsset.fileUrl.startsWith('/') ? '' : '/'}${previewAsset.fileUrl}`}
+                  src={previewAsset.fileUrl.startsWith('http') ? previewAsset.fileUrl : `https://schedulebubble.onrender.com${previewAsset.fileUrl.startsWith('/') ? '' : '/'}${previewAsset.fileUrl}`}
                   alt={previewAsset.fileName} 
                   className="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl bg-black/50 pointer-events-auto"
                 />

@@ -31,7 +31,7 @@ export const ScheduleCalendar = () => {
     const fetchPosts = async () => {
       try {
         const token = localStorage.getItem('token');
-        const response = await fetch('https://schedulebubble-zjof.onrender.com/api/analytics/calendar', {
+        const response = await fetch('https://schedulebubble.onrender.com/api/analytics/calendar', {
           headers: token ? { 'Authorization': `Bearer ${token}` } : {},
           credentials: 'include',
         });
@@ -52,18 +52,7 @@ export const ScheduleCalendar = () => {
     return <div className="text-slate-400 text-sm p-8 text-center animate-pulse">Loading schedule...</div>;
   }
 
-  if (posts.length === 0) {
-    return (
-      <div
-        className="w-full max-w-4xl mx-auto p-12 rounded-3xl border border-slate-800/80 backdrop-blur-2xl shadow-2xl text-center hover:scale-[1.01] hover:border-indigo-500/20 transition-all duration-300"
-        style={{ background: 'rgba(13,18,32,0.7)' }}
-      >
-        <Calendar className="w-12 h-12 text-slate-600 mx-auto mb-4" />
-        <h3 className="text-xl font-bold text-white mb-2">No upcoming posts</h3>
-        <p className="text-slate-500">Use the content composer to draft and schedule your first post.</p>
-      </div>
-    );
-  }
+
 
   const filteredPosts = posts.filter(post => {
     if (!selectedDate) return false;
@@ -105,6 +94,11 @@ export const ScheduleCalendar = () => {
           <div className="text-center py-16 text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-slate-200 dark:border-slate-800 border-dashed shadow-sm">
             <Calendar className="w-8 h-8 mx-auto mb-3 opacity-50" />
             <p>Select a date to view your content schedule.</p>
+          </div>
+        ) : posts.length === 0 ? (
+          <div className="text-center py-16 text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-slate-200 dark:border-slate-800 border-dashed shadow-sm">
+            <Calendar className="w-8 h-8 mx-auto mb-3 opacity-50" />
+            <p>No upcoming posts. Use the content composer to schedule your first post.</p>
           </div>
         ) : filteredPosts.length === 0 ? (
           <div className="text-center py-16 text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-slate-200 dark:border-slate-800 border-dashed shadow-sm">

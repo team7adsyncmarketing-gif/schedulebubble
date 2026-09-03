@@ -26,7 +26,7 @@ const AIWriterModal: React.FC<{ isOpen: boolean; onClose: () => void; onGenerate
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('https://schedulebubble-zjof.onrender.com/api/ai/generate', {
+      const response = await fetch('https://schedulebubble.onrender.com/api/ai/generate', {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
@@ -137,7 +137,7 @@ const LibraryModal: React.FC<{ isOpen: boolean; onClose: () => void; onSelect: (
       const headers: Record<string, string> = {};
       if (token) headers['Authorization'] = `Bearer ${token}`;
 
-      fetch('https://schedulebubble-zjof.onrender.com/api/media', { 
+      fetch('https://schedulebubble.onrender.com/api/media', { 
         headers,
         credentials: 'include' 
       })
@@ -203,7 +203,7 @@ export const ContentComposer = () => {
     const fetchAccounts = async () => {
       try {
         const token = localStorage.getItem('token');
-        const res = await fetch('https://schedulebubble-zjof.onrender.com/api/oauth/accounts', {
+        const res = await fetch('https://schedulebubble.onrender.com/api/oauth/accounts', {
           headers: token ? { 'Authorization': 'Bearer ' + token } : {},
           credentials: 'include'
         });
@@ -289,7 +289,7 @@ export const ContentComposer = () => {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('https://schedulebubble-zjof.onrender.com/api/posts', {
+      const response = await fetch('https://schedulebubble.onrender.com/api/posts', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -341,7 +341,7 @@ export const ContentComposer = () => {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('https://schedulebubble-zjof.onrender.com/api/posts', {
+      const response = await fetch('https://schedulebubble.onrender.com/api/posts', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
