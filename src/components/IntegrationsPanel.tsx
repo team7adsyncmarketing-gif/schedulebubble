@@ -386,14 +386,16 @@ export const IntegrationsPanel = () => {
                           {account.profileName}
                         </span>
                       </div>
-                      <button
-                        onClick={() => handleDisconnect(account._id)}
-                        className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-colors flex items-center gap-1 text-xs font-medium"
-                        title="Disconnect"
-                      >
-                        <Unlink className="w-3.5 h-3.5" />
-                        Disconnect
-                      </button>
+                      {account._id !== 'system_telegram' && (
+                        <button
+                          onClick={() => handleDisconnect(account._id)}
+                          className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-colors flex items-center gap-1 text-xs font-medium"
+                          title="Disconnect"
+                        >
+                          <Unlink className="w-3.5 h-3.5" />
+                          Disconnect
+                        </button>
+                      )}
                     </div>
                   ))}
                 </div>
