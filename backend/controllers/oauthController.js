@@ -397,18 +397,6 @@ export const getConnectedAccounts = async (req, res) => {
       createdAt: a.created_at
     }));
 
-    // Inject System Telegram if env vars exist and user hasn't explicitly connected one
-    const hasTelegram = mappedAccounts.some(a => a.platform === 'telegram');
-    if (!hasTelegram && process.env.TELEGRAM_BOT_TOKEN && process.env.TELEGRAM_CHAT_ID) {
-      mappedAccounts.push({
-        _id: 'system_telegram',
-        platform: 'telegram',
-        profileId: process.env.TELEGRAM_CHAT_ID,
-        profileName: `System Configured`,
-        createdAt: new Date().toISOString()
-      });
-    }
-
     res.status(200).json(mappedAccounts);
   } catch (error) {
     res.status(500).json({ message: 'Server error fetching connected accounts' });
