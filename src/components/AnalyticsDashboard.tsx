@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Activity, BarChart2, CalendarDays, FileText, Clock, Zap, Sparkles, Copy, CalendarPlus, Check } from 'lucide-react';
+import { Activity, BarChart2, CalendarDays, FileText, Clock, Zap, Sparkles, Copy, CalendarPlus, Check, Hash } from 'lucide-react';
 import { FaXTwitter, FaLinkedin, FaFacebook, FaInstagram, FaTelegram } from 'react-icons/fa6';
 
 interface ScheduledPost {
