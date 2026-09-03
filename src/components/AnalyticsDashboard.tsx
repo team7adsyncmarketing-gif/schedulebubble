@@ -147,8 +147,8 @@ const ChannelStatusCard = ({ connectedAccounts }: { connectedAccounts: any[] }) 
       <div className="grid grid-cols-2 gap-3 flex-grow">
         {platforms.map((p, i) => {
           const isActive = connectedAccounts.some(acc => {
-            if (p.id === 'instagram') return acc.platform === 'meta' && acc.profileName?.toLowerCase().includes('instagram');
-            if (p.id === 'facebook') return acc.platform === 'meta' && acc.profileName?.toLowerCase().includes('facebook');
+            if (p.id === 'instagram') return acc.platform === 'meta' && (acc.profileName?.toLowerCase().includes('instagram') || acc.profileName?.toLowerCase().includes('manual'));
+            if (p.id === 'facebook') return acc.platform === 'meta' && (acc.profileName?.toLowerCase().includes('facebook') || acc.profileName?.toLowerCase().includes('manual'));
             if (p.id === 'twitter') return acc.platform === 'x' || acc.platform === 'twitter';
             return acc.platform === p.id;
           });
