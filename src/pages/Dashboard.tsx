@@ -93,7 +93,7 @@ const Dashboard: React.FC = () => {
         </section>
 
         {/* Composer */}
-        <section>
+        <section id="composer-section">
           <SectionLabel icon={<Layers className="w-4 h-4" />} label="Create & Publish" />
           <ContentComposer />
         </section>

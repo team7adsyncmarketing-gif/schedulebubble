@@ -1,6 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { Activity, BarChart2, CalendarDays, FileText, Clock, Zap, CheckCircle2, Sparkles, Copy, CalendarPlus, Settings, Hash } from 'lucide-react';
+import { Activity, BarChart2, CalendarDays, FileText, Clock, Zap, Sparkles, Copy, CalendarPlus, Check } from 'lucide-react';
 import { FaXTwitter, FaLinkedin, FaFacebook, FaInstagram, FaTelegram } from 'react-icons/fa6';
+
+interface ScheduledPost {
+  id: string;
+  content: string;
+  platforms: string[];
+  scheduledAt: string;
+}
 
 interface AnalyticsData {
   publishedCount: number;
@@ -37,71 +44,129 @@ const StatCard: React.FC<StatCardProps> = ({ icon, iconBg, label, value, glowCol
   </div>
 );
 
-// Card 1: Next Up in Queue (2x1)
-const NextUpCard = () => (
-  <div className={`${BaseCardClass} md:col-span-2 bg-emerald-50/50 dark:bg-emerald-950/20 flex flex-col justify-between`}>
-    <div className="flex items-center justify-between mb-4">
-      <h3 className="text-gray-900 dark:text-white font-bold flex items-center gap-2">
-        <Clock className="w-5 h-5 text-emerald-500" /> Next Up in Queue
-      </h3>
-      <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 text-xs font-semibold">
-        <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-        Publishing in 2h 14m
-      </div>
-    </div>
+const NextUpCard = ({ nextPost }: { nextPost?: ScheduledPost }) => {
+  const [timeLeft, setTimeLeft] = useState('');
+
+  useEffect(() => {
+    if (!nextPost) return;
+    const updateTimer = () => {
+      const now = new Date();
+      const scheduled = new Date(nextPost.scheduledAt);
+      const diffMs = scheduled.getTime() - now.getTime();
+      
+      if (diffMs <= 0) {
+        setTimeLeft('Publishing soon');
+        return;
+      }
+      const hrs = Math.floor(diffMs / (1000 * 60 * 60));
+      const mins = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+      setTimeLeft(`Publishing in ${hrs}h ${mins}m`);
+    };
     
-    <div className="flex-grow flex flex-col justify-center">
-      <p className="text-gray-900 dark:text-gray-100 text-lg font-medium leading-snug line-clamp-2 mb-3">
-        "Excited to announce our new Q3 features! We've listened to your feedback and completely revamped the workflow engine. 🚀"
-      </p>
-      <div className="flex items-center gap-2">
-        <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-blue-100/80 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 text-xs font-medium border border-blue-200 dark:border-blue-500/20">
-          <FaFacebook className="w-3 h-3" /> Facebook
-        </span>
-        <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-pink-100/80 dark:bg-pink-500/10 text-pink-700 dark:text-pink-400 text-xs font-medium border border-pink-200 dark:border-pink-500/20">
-          <FaInstagram className="w-3 h-3" /> Instagram
-        </span>
+    updateTimer();
+    const int = setInterval(updateTimer, 60000);
+    return () => clearInterval(int);
+  }, [nextPost]);
+
+  const platformIcons: Record<string, any> = {
+    facebook: FaFacebook,
+    instagram: FaInstagram,
+    linkedin: FaLinkedin,
+    twitter: FaXTwitter,
+    telegram: FaTelegram
+  };
+
+  const platformColors: Record<string, string> = {
+    facebook: 'bg-blue-100/80 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-500/20',
+    instagram: 'bg-pink-100/80 dark:bg-pink-500/10 text-pink-700 dark:text-pink-400 border-pink-200 dark:border-pink-500/20',
+    linkedin: 'bg-sky-100/80 dark:bg-sky-500/10 text-sky-700 dark:text-sky-400 border-sky-200 dark:border-sky-500/20',
+    twitter: 'bg-gray-100/80 dark:bg-gray-500/10 text-gray-700 dark:text-gray-400 border-gray-200 dark:border-gray-500/20',
+    telegram: 'bg-sky-100/80 dark:bg-sky-500/10 text-sky-700 dark:text-sky-400 border-sky-200 dark:border-sky-500/20',
+  };
+
+  if (!nextPost) {
+    return (
+      <div className={`${BaseCardClass} md:col-span-2 bg-slate-50/50 dark:bg-slate-900/20 flex flex-col items-center justify-center min-h-[200px]`}>
+        <Clock className="w-10 h-10 text-slate-400 mb-3 opacity-50" />
+        <h3 className="text-slate-500 dark:text-slate-400 font-bold mb-1">Queue is Empty</h3>
+        <p className="text-sm text-slate-400">You don't have any posts scheduled yet.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className={`${BaseCardClass} md:col-span-2 bg-emerald-50/50 dark:bg-emerald-950/20 flex flex-col justify-between`}>
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-gray-900 dark:text-white font-bold flex items-center gap-2">
+          <Clock className="w-5 h-5 text-emerald-500" /> Next Up in Queue
+        </h3>
+        <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 text-xs font-semibold">
+          <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+          {timeLeft}
+        </div>
+      </div>
+      
+      <div className="flex-grow flex flex-col justify-center">
+        <p className="text-gray-900 dark:text-gray-100 text-lg font-medium leading-snug line-clamp-2 mb-3">
+          "{nextPost.content}"
+        </p>
+        <div className="flex items-center gap-2 flex-wrap">
+          {(nextPost.platforms || []).map((p: string) => {
+            const Icon = platformIcons[p.toLowerCase()] || Activity;
+            const colorClass = platformColors[p.toLowerCase()] || 'bg-gray-100 dark:bg-gray-800 text-gray-500';
+            return (
+              <span key={p} className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium border ${colorClass}`}>
+                <Icon className="w-3 h-3" /> <span className="capitalize">{p}</span>
+              </span>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="mt-5 w-full bg-gray-200 dark:bg-gray-800 rounded-full h-1.5 overflow-hidden">
+        <div className="bg-emerald-500 h-1.5 rounded-full animate-pulse" style={{ width: '100%' }}></div>
       </div>
     </div>
+  );
+};
 
-    <div className="mt-5 w-full bg-gray-200 dark:bg-gray-800 rounded-full h-1.5 overflow-hidden">
-      <div className="bg-emerald-500 h-1.5 rounded-full" style={{ width: '75%' }}></div>
+const ChannelStatusCard = ({ connectedAccounts }: { connectedAccounts: string[] }) => {
+  const platforms = [
+    { name: 'Instagram', icon: FaInstagram, color: 'text-pink-500' },
+    { name: 'Facebook', icon: FaFacebook, color: 'text-blue-500' },
+    { name: 'Telegram', icon: FaTelegram, color: 'text-sky-500' },
+    { name: 'X (Twitter)', icon: FaXTwitter, color: 'text-gray-400 dark:text-gray-500' },
+    { name: 'LinkedIn', icon: FaLinkedin, color: 'text-gray-400 dark:text-gray-500' },
+  ];
+
+  return (
+    <div className={`${BaseCardClass} flex flex-col`}>
+      <h3 className="text-gray-900 dark:text-white font-bold flex items-center gap-2 mb-5">
+        <Zap className="w-5 h-5 text-amber-500" /> API Health
+      </h3>
+      <div className="grid grid-cols-2 gap-3 flex-grow">
+        {platforms.map((p, i) => {
+          const isActive = connectedAccounts.includes(p.name.split(' ')[0].toLowerCase());
+          return (
+            <div key={i} className={`flex items-center gap-2 p-2 rounded-xl border transition-colors ${isActive ? 'bg-emerald-50/50 dark:bg-emerald-900/10 border-emerald-100 dark:border-emerald-800/30' : 'bg-gray-50 dark:bg-gray-800/50 border-gray-100 dark:border-gray-700/50'}`}>
+              <p.icon className={`w-5 h-5 ${p.color} ${!isActive ? 'opacity-40 grayscale' : ''}`} />
+              <div className="flex-grow">
+                <p className="text-[10px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider leading-none">{p.name}</p>
+              </div>
+              {isActive ? (
+                <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.8)]" />
+              ) : (
+                <div className="h-2 w-2 rounded-full bg-gray-300 dark:bg-gray-600" />
+              )}
+            </div>
+          );
+        })}
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
-// Card 2: Instant Multi-Channel Status (1x1)
-const ChannelStatusCard = () => (
-  <div className={`${BaseCardClass} flex flex-col`}>
-    <h3 className="text-gray-900 dark:text-white font-bold flex items-center gap-2 mb-5">
-      <Zap className="w-5 h-5 text-amber-500" /> API Health
-    </h3>
-    <div className="grid grid-cols-2 gap-3 flex-grow">
-      {[
-        { name: 'Instagram', icon: FaInstagram, active: true, color: 'text-pink-500' },
-        { name: 'Facebook', icon: FaFacebook, active: true, color: 'text-blue-500' },
-        { name: 'Telegram', icon: FaTelegram, active: true, color: 'text-sky-500' },
-        { name: 'X (Twitter)', icon: FaXTwitter, active: false, color: 'text-gray-400 dark:text-gray-500' },
-        { name: 'LinkedIn', icon: FaLinkedin, active: false, color: 'text-gray-400 dark:text-gray-500' },
-      ].map((p, i) => (
-        <div key={i} className="flex items-center gap-2 p-2 rounded-xl bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-700/50">
-          <p.icon className={`w-5 h-5 ${p.color}`} />
-          <div className="flex-grow">
-            <p className="text-[10px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider leading-none">{p.name}</p>
-          </div>
-          {p.active ? (
-            <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.8)]" />
-          ) : (
-            <div className="h-2 w-2 rounded-full bg-gray-300 dark:bg-gray-600" />
-          )}
-        </div>
-      ))}
-    </div>
-  </div>
-);
-
-// Card 3: Best Time to Post (1x2 - Tall)
-const BestTimeCard = () => (
+const BestTimeCard = ({ onAutoSchedule }: { onAutoSchedule: () => void }) => (
   <div className={`${BaseCardClass} md:row-span-2 flex flex-col`}>
     <div className="flex items-center justify-between mb-6">
       <h3 className="text-gray-900 dark:text-white font-bold flex items-center gap-2">
@@ -112,7 +177,6 @@ const BestTimeCard = () => (
     <div className="flex-grow flex flex-col justify-center gap-4 relative">
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-white/90 dark:to-gray-900/90 z-10 pointer-events-none" style={{ top: '60%' }} />
       
-      {/* Mini Bar Chart Mock */}
       <div className="flex items-end justify-between h-40 gap-1.5 px-2">
         {[40, 65, 30, 85, 100, 45, 20].map((h, i) => (
           <div key={i} className="w-full bg-gray-100 dark:bg-gray-800 rounded-t-md relative group">
@@ -121,7 +185,7 @@ const BestTimeCard = () => (
               style={{ height: `${h}%` }}
             >
               {h === 100 && (
-                <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-[10px] font-bold px-2 py-1 rounded">
+                <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-[10px] font-bold px-2 py-1 rounded whitespace-nowrap">
                   6:45 PM
                 </div>
               )}
@@ -139,14 +203,16 @@ const BestTimeCard = () => (
         <p className="text-indigo-900 dark:text-indigo-200 text-sm font-semibold mb-1">Today's Sweet Spot</p>
         <p className="text-indigo-600 dark:text-indigo-400 text-2xl font-black">6:45 PM <span className="text-sm font-medium">EST</span></p>
       </div>
-      <button className="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm transition-colors flex items-center justify-center gap-2 shadow-md shadow-indigo-500/20">
+      <button 
+        onClick={onAutoSchedule}
+        className="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm transition-colors flex items-center justify-center gap-2 shadow-md shadow-indigo-500/20"
+      >
         <CalendarPlus className="w-4 h-4" /> Auto-Schedule to Slot
       </button>
     </div>
   </div>
 );
 
-// Card 4: CSV Bulk Queue Velocity (1x1)
 const VelocityCard = () => (
   <div className={`${BaseCardClass} flex flex-col items-center justify-center text-center`}>
     <h3 className="text-gray-900 dark:text-white font-bold absolute top-6 left-6 flex items-center gap-2">
@@ -181,61 +247,108 @@ const VelocityCard = () => (
   </div>
 );
 
-// Card 5: Smart Caption & Hashtag Assist (2x1)
-const SmartCaptionCard = () => (
-  <div className={`${BaseCardClass} md:col-span-2 flex flex-col`}>
-    <div className="flex items-center justify-between mb-4">
-      <h3 className="text-gray-900 dark:text-white font-bold flex items-center gap-2">
-        <Sparkles className="w-5 h-5 text-purple-500" /> AI Caption Assist
-      </h3>
-      <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-white/5 dark:hover:bg-white/10 text-gray-700 dark:text-gray-300 text-xs font-semibold transition-colors">
-        <Sparkles className="w-3.5 h-3.5" /> One-click Polish
-      </button>
-    </div>
-    
-    <div className="flex-grow p-4 rounded-2xl bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-700/50 relative group">
-      <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed mb-4">
-        Ready to take your productivity to the next level? Our new automation features save you 10+ hours a week. Drop a 🚀 below if you're ready to scale!
-      </p>
-      <div className="flex flex-wrap gap-2">
-        {['#GrowthHacking', '#SocialMediaTools', '#Productivity', '#SaaS'].map((tag, i) => (
-          <span key={i} className="px-2.5 py-1 rounded-md bg-purple-100/50 dark:bg-purple-500/10 text-purple-700 dark:text-purple-300 text-xs font-medium flex items-center gap-1">
-            <Hash className="w-3 h-3 opacity-50" /> {tag.replace('#', '')}
-          </span>
-        ))}
+const SmartCaptionCard = () => {
+  const [copied, setCopied] = useState(false);
+  const [polishing, setPolishing] = useState(false);
+  const captionText = "Ready to take your productivity to the next level? Our new automation features save you 10+ hours a week. Drop a 🚀 below if you're ready to scale!";
+  const hashtags = ['GrowthHacking', 'SocialMediaTools', 'Productivity', 'SaaS'];
+
+  const handleCopy = () => {
+    const fullText = `${captionText}\n\n${hashtags.map(t => `#${t}`).join(' ')}`;
+    navigator.clipboard.writeText(fullText);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handlePolish = () => {
+    setPolishing(true);
+    setTimeout(() => setPolishing(false), 800);
+  };
+
+  return (
+    <div className={`${BaseCardClass} md:col-span-2 flex flex-col`}>
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-gray-900 dark:text-white font-bold flex items-center gap-2">
+          <Sparkles className="w-5 h-5 text-purple-500" /> AI Caption Assist
+        </h3>
+        <button 
+          onClick={handlePolish}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-white/5 dark:hover:bg-white/10 text-gray-700 dark:text-gray-300 text-xs font-semibold transition-colors"
+        >
+          <Sparkles className={`w-3.5 h-3.5 ${polishing ? 'animate-spin text-purple-500' : ''}`} /> 
+          {polishing ? 'Polishing...' : 'One-click Polish'}
+        </button>
       </div>
       
-      <button className="absolute top-4 right-4 p-2 rounded-lg bg-white dark:bg-gray-700 text-gray-400 hover:text-gray-900 dark:hover:text-white shadow-sm border border-gray-200 dark:border-gray-600 opacity-0 group-hover:opacity-100 transition-all duration-200 transform translate-y-1 group-hover:translate-y-0">
-        <Copy className="w-4 h-4" />
-      </button>
+      <div className={`flex-grow p-4 rounded-2xl bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-700/50 relative group transition-all duration-300 ${polishing ? 'opacity-50 blur-[1px]' : ''}`}>
+        <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed mb-4">
+          {captionText}
+        </p>
+        <div className="flex flex-wrap gap-2">
+          {hashtags.map((tag, i) => (
+            <span key={i} className="px-2.5 py-1 rounded-md bg-purple-100/50 dark:bg-purple-500/10 text-purple-700 dark:text-purple-300 text-xs font-medium flex items-center gap-1">
+              <Hash className="w-3 h-3 opacity-50" /> {tag}
+            </span>
+          ))}
+        </div>
+        
+        <button 
+          onClick={handleCopy}
+          className="absolute top-4 right-4 p-2 rounded-lg bg-white dark:bg-gray-700 text-gray-400 hover:text-gray-900 dark:hover:text-white shadow-sm border border-gray-200 dark:border-gray-600 opacity-0 group-hover:opacity-100 transition-all duration-200 transform translate-y-1 group-hover:translate-y-0"
+        >
+          {copied ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4" />}
+        </button>
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 export const AnalyticsDashboard = () => {
   const [data, setData] = useState<AnalyticsData | null>(null);
+  const [queuedPosts, setQueuedPosts] = useState<ScheduledPost[]>([]);
+  const [connectedAccounts, setConnectedAccounts] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchAnalytics = async () => {
+    const fetchData = async () => {
       try {
         const token = localStorage.getItem('token');
-        const response = await fetch('https://schedulebubble.onrender.com/api/analytics/summary', {
-          headers: token ? { 'Authorization': `Bearer ${token}` } : {},
-          credentials: 'include',
-        });
-        if (response.ok) {
-          const result = await response.json();
-          setData(result);
+        const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+        
+        const [analyticsRes, queueRes, accountsRes] = await Promise.all([
+          fetch('https://schedulebubble.onrender.com/api/analytics/summary', { headers, credentials: 'include' }),
+          fetch('https://schedulebubble.onrender.com/api/posts/queue', { headers, credentials: 'include' }),
+          fetch('https://schedulebubble.onrender.com/api/oauth/connected', { headers, credentials: 'include' })
+        ]);
+        
+        if (analyticsRes.ok) setData(await analyticsRes.json());
+        
+        if (queueRes.ok) {
+          const queue = await queueRes.json();
+          // Sort by scheduledAt ascending so the most imminent is first
+          const sorted = queue.sort((a: any, b: any) => new Date(a.scheduledAt).getTime() - new Date(b.scheduledAt).getTime());
+          setQueuedPosts(sorted);
+        }
+        
+        if (accountsRes.ok) {
+           const accs = await accountsRes.json();
+           setConnectedAccounts(accs.map((a: any) => a.provider?.toLowerCase()));
         }
       } catch (err) {
-        console.error('Failed to fetch analytics', err);
+        console.error('Failed to fetch dashboard data', err);
       } finally {
         setLoading(false);
       }
     };
-    fetchAnalytics();
+    fetchData();
   }, []);
+
+  const handleAutoSchedule = () => {
+    const composer = document.getElementById('composer-section');
+    if (composer) {
+      composer.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
 
   if (loading) {
     return (
@@ -250,7 +363,7 @@ export const AnalyticsDashboard = () => {
     );
   }
 
-  const stats = data || { publishedCount: 0, scheduledCount: 0, totalPosts: 0, successRate: '0%' };
+  const stats = data || { publishedCount: 0, scheduledCount: queuedPosts.length, totalPosts: 0, successRate: '0%' };
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-5">
@@ -266,7 +379,7 @@ export const AnalyticsDashboard = () => {
         icon={<CalendarDays className="w-6 h-6 text-emerald-400" />}
         iconBg="bg-emerald-500/10 border-emerald-500/20"
         label="Scheduled"
-        value={stats.scheduledCount}
+        value={stats.scheduledCount || queuedPosts.length}
         glowColor="rgba(52,211,153,1)"
       />
       <StatCard
@@ -285,15 +398,13 @@ export const AnalyticsDashboard = () => {
       />
 
       {/* Row 2 */}
-      <NextUpCard />
-      <ChannelStatusCard />
-      <BestTimeCard />
+      <NextUpCard nextPost={queuedPosts[0]} />
+      <ChannelStatusCard connectedAccounts={connectedAccounts} />
+      <BestTimeCard onAutoSchedule={handleAutoSchedule} />
 
       {/* Row 3 */}
       <SmartCaptionCard />
       <VelocityCard />
-      
-      {/* Note: BestTimeCard automatically spans into Row 3 column 4 because of row-span-2 */}
     </div>
   );
 };
