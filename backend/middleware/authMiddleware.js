@@ -19,6 +19,7 @@ const protect = async (req, res, next) => {
       const { data: { user }, error } = await supabase.auth.getUser(token);
 
       if (error || !user) {
+        console.error('Supabase getUser error:', error);
         throw new Error('Not authorized');
       }
 
