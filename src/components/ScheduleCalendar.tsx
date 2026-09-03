@@ -74,7 +74,7 @@ export const ScheduleCalendar = () => {
               type="date"
               value={selectedDate}
               onChange={(e) => setSelectedDate(e.target.value)}
-              className="pl-9 pr-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-sm text-slate-300 focus:outline-none focus:border-indigo-500"
+              className="pl-9 pr-3 py-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg text-sm text-slate-900 dark:text-slate-300 focus:outline-none focus:border-indigo-500"
             />
             <Filter className="absolute left-3 top-2.5 w-4 h-4 text-slate-500" />
           </div>

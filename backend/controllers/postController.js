@@ -15,6 +15,9 @@ export const createPost = async (req, res) => {
     return res.status(400).json({ message: 'Content and at least one destination are required' });
   }
 
+  // Helper to check valid UUID
+  const isUUID = (str) => typeof str === 'string' && /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(str);
+
   try {
     let initialStatus = status || 'scheduled';
     let finalScheduledFor = scheduledFor ? new Date(scheduledFor).toISOString() : new Date().toISOString();
@@ -34,12 +37,38 @@ export const createPost = async (req, res) => {
 
     if (postError) throw postError;
 
-    // 2. Create Publish Jobs
-    const jobsToInsert = finalDestinations.map(dest => ({
+    // 2. Resolve Profile IDs asynchronously to handle cases where frontend sends platform_account_id instead of UUID
+    const resolvedDestinations = await Promise.all(finalDestinations.map(async (dest) => {
+      let resolvedId = null;
+      if (dest.profileId && dest.profileId !== 'system_telegram') {
+        if (isUUID(dest.profileId)) {
+          resolvedId = dest.profileId;
+        } else {
+          // Frontend sent a non-UUID (e.g. platform_account_id), let's look up the correct UUID
+          const { data } = await supabase
+            .from('social_profiles')
+            .select('id')
+            .eq('user_id', req.user.id)
+            .eq('platform_account_id', String(dest.profileId))
+            .limit(1)
+            .single();
+          if (data && data.id) {
+            resolvedId = data.id;
+          }
+        }
+      }
+      return {
+        ...dest,
+        resolvedProfileId: resolvedId
+      };
+    }));
+
+    // 3. Create Publish Jobs
+    const jobsToInsert = resolvedDestinations.map(dest => ({
       user_id: req.user.id,
       post_id: post.id,
       platform: dest.platform,
-      social_profile_id: (dest.profileId && dest.profileId !== 'system_telegram') ? dest.profileId : null,
+      social_profile_id: dest.resolvedProfileId,
       status: jobStatus,
       scheduled_for: finalScheduledFor,
     }));
