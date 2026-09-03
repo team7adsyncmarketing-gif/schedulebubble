@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Activity, BarChart2, CalendarDays, FileText, Clock, Zap, CheckCircle2, Sparkles, Copy, CalendarPlus, Settings, Hash, Facebook, Instagram, Linkedin, Twitter, MessageCircle } from 'lucide-react';
+import { Activity, BarChart2, CalendarDays, FileText, Clock, Zap, CheckCircle2, Sparkles, Copy, CalendarPlus, Settings, Hash } from 'lucide-react';
 import { FaXTwitter, FaLinkedin, FaFacebook, FaInstagram, FaTelegram } from 'react-icons/fa6';
 
 interface AnalyticsData {
