@@ -130,13 +130,13 @@ const NextUpCard = ({ nextPost }: { nextPost?: ScheduledPost }) => {
   );
 };
 
-const ChannelStatusCard = ({ connectedAccounts }: { connectedAccounts: string[] }) => {
+const ChannelStatusCard = ({ connectedAccounts }: { connectedAccounts: any[] }) => {
   const platforms = [
-    { name: 'Instagram', icon: FaInstagram, color: 'text-pink-500' },
-    { name: 'Facebook', icon: FaFacebook, color: 'text-blue-500' },
-    { name: 'Telegram', icon: FaTelegram, color: 'text-sky-500' },
-    { name: 'X (Twitter)', icon: FaXTwitter, color: 'text-gray-400 dark:text-gray-500' },
-    { name: 'LinkedIn', icon: FaLinkedin, color: 'text-gray-400 dark:text-gray-500' },
+    { id: 'instagram', name: 'Instagram', icon: FaInstagram, color: 'text-pink-500' },
+    { id: 'facebook', name: 'Facebook', icon: FaFacebook, color: 'text-blue-500' },
+    { id: 'telegram', name: 'Telegram', icon: FaTelegram, color: 'text-sky-500' },
+    { id: 'twitter', name: 'X (Twitter)', icon: FaXTwitter, color: 'text-gray-400 dark:text-gray-500' },
+    { id: 'linkedin', name: 'LinkedIn', icon: FaLinkedin, color: 'text-gray-400 dark:text-gray-500' },
   ];
 
   return (
@@ -146,7 +146,12 @@ const ChannelStatusCard = ({ connectedAccounts }: { connectedAccounts: string[] 
       </h3>
       <div className="grid grid-cols-2 gap-3 flex-grow">
         {platforms.map((p, i) => {
-          const isActive = connectedAccounts.includes(p.name.split(' ')[0].toLowerCase());
+          const isActive = connectedAccounts.some(acc => {
+            if (p.id === 'instagram') return acc.platform === 'meta' && acc.profileName?.toLowerCase().includes('instagram');
+            if (p.id === 'facebook') return acc.platform === 'meta' && acc.profileName?.toLowerCase().includes('facebook');
+            if (p.id === 'twitter') return acc.platform === 'x' || acc.platform === 'twitter';
+            return acc.platform === p.id;
+          });
           return (
             <div key={i} className={`flex items-center gap-2 p-2 rounded-xl border transition-colors ${isActive ? 'bg-emerald-50/50 dark:bg-emerald-900/10 border-emerald-100 dark:border-emerald-800/30' : 'bg-gray-50 dark:bg-gray-800/50 border-gray-100 dark:border-gray-700/50'}`}>
               <p.icon className={`w-5 h-5 ${p.color} ${!isActive ? 'opacity-40 grayscale' : ''}`} />
@@ -250,8 +255,8 @@ const VelocityCard = () => (
 const SmartCaptionCard = () => {
   const [copied, setCopied] = useState(false);
   const [polishing, setPolishing] = useState(false);
-  const captionText = "Ready to take your productivity to the next level? Our new automation features save you 10+ hours a week. Drop a 🚀 below if you're ready to scale!";
-  const hashtags = ['GrowthHacking', 'SocialMediaTools', 'Productivity', 'SaaS'];
+  const [captionText, setCaptionText] = useState("Ready to take your productivity to the next level? Our new automation features save you 10+ hours a week. Drop a 🚀 below if you're ready to scale!");
+  const [hashtags, setHashtags] = useState(['GrowthHacking', 'SocialMediaTools', 'Productivity', 'SaaS']);
 
   const handleCopy = () => {
     const fullText = `${captionText}\n\n${hashtags.map(t => `#${t}`).join(' ')}`;
@@ -260,9 +265,40 @@ const SmartCaptionCard = () => {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handlePolish = () => {
+  const handlePolish = async () => {
     setPolishing(true);
-    setTimeout(() => setPolishing(false), 800);
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('https://schedulebubble.onrender.com/api/ai/generate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        },
+        body: JSON.stringify({ 
+          topic: "Write a short, engaging, and random social media caption for a digital product",
+          tone: "enthusiastic",
+          platforms: ["instagram", "twitter"] 
+        })
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        // Extract hashtags if any exist in the response
+        const generated = data.content;
+        const extractedHashtags = generated.match(/#[\w]+/g) || [];
+        const cleanText = generated.replace(/#[\w]+/g, '').trim();
+        
+        setCaptionText(cleanText || generated);
+        if (extractedHashtags.length > 0) {
+          setHashtags(extractedHashtags.map((t: string) => t.replace('#', '')));
+        }
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setPolishing(false);
+    }
   };
 
   return (
@@ -306,7 +342,7 @@ const SmartCaptionCard = () => {
 export const AnalyticsDashboard = () => {
   const [data, setData] = useState<AnalyticsData | null>(null);
   const [queuedPosts, setQueuedPosts] = useState<ScheduledPost[]>([]);
-  const [connectedAccounts, setConnectedAccounts] = useState<string[]>([]);
+  const [connectedAccounts, setConnectedAccounts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -343,7 +379,7 @@ export const AnalyticsDashboard = () => {
         if (accountsRes.ok) {
            const accs = await accountsRes.json().catch(() => null);
            if (Array.isArray(accs)) {
-             setConnectedAccounts(accs.map(a => a.platform?.toLowerCase() || a.provider?.toLowerCase()));
+             setConnectedAccounts(accs);
            }
         }
       } catch (err) {
