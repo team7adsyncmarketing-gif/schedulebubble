@@ -109,7 +109,7 @@ function App() {
 
   const fetchUserProfile = async (token: string) => {
     try {
-      const response = await fetch('https://schedulebubble-zjof.onrender.com/api/auth/me', {
+      const response = await fetch('https://schedulebubble.onrender.com/api/auth/me', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
