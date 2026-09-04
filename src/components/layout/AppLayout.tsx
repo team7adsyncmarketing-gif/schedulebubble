@@ -412,7 +412,7 @@ export const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children })
 
   return (
     <ThemeCtx.Provider value={{ isDark, toggleTheme }}>
-      <div className={`relative w-full min-h-screen font-sans transition-colors duration-500 ${isDark ? 'bg-[#090d16] text-white' : 'bg-[#dcd7cb] text-slate-900'}`}>
+      <div className={`relative w-full min-h-screen font-sans transition-colors duration-500 ${isDark ? 'bg-[#090d16] text-white' : 'bg-gradient-to-b from-[#5eb1e6] via-[#86c8ec] to-[#f3ebd3] text-slate-900'}`}>
         <div className="fixed inset-0 z-0">
           <AnimatedScene mouseRef={mouseRef} glowRef={glowRef} isDark={isDark} />
         </div>
