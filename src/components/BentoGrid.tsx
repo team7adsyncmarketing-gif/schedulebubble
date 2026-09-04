@@ -121,8 +121,8 @@ const BentoCard: React.FC<BentoCardProps> = ({ title, description, className = "
         transformStyle: "preserve-3d",
       }}
       className={`relative group rounded-3xl p-8 flex flex-col justify-between overflow-hidden
-        bg-white dark:bg-neutral-900 
-        border border-neutral-200 dark:border-neutral-800
+        bg-white/80 backdrop-blur-md dark:bg-neutral-900 
+        border border-slate-200 dark:border-neutral-800
         hover:shadow-2xl hover:shadow-indigo-500/10 dark:hover:shadow-indigo-500/5
         transition-all duration-300 ease-out
         ${className}`}
