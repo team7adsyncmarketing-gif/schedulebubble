@@ -50,6 +50,33 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
     }
   };
 
+  const handleForgotPassword = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    setErrorMessage('');
+    setSuccessMessage('');
+    if (!formData.email.trim()) {
+      setErrorMessage('Please enter your email address above first to receive a password reset link.');
+      return;
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      setErrorMessage('Please enter a valid email address.');
+      return;
+    }
+    setIsLoading(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(formData.email.trim(), {
+        redirectTo: window.location.origin,
+      });
+      if (error) throw error;
+      setSuccessMessage('Password reset link sent! Please check your email to set a password.');
+    } catch (err: any) {
+      setErrorMessage(err.message || 'Failed to send password reset email.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage('');
@@ -85,6 +112,12 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
         });
         
         if (error) throw error;
+
+        // When a user already exists with Google OAuth, Supabase returns identities: []
+        if (data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) {
+          setErrorMessage('This email is already registered using Google. Please click "Continue with Google" above to sign in, or use "Forgot password?" to set an email password.');
+          return;
+        }
         
         if (data.user && !data.session) {
           setSuccessMessage('Success! Please check your email and click the link to verify your account.');
@@ -104,7 +137,12 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
           password: formData.password,
         });
         
-        if (error) throw error;
+        if (error) {
+          if (error.message?.toLowerCase().includes('invalid login credentials')) {
+            throw new Error('Invalid login credentials. If you previously created this account with Google, please click "Continue with Google" or click "Forgot password?" to set a password.');
+          }
+          throw error;
+        }
         
         setSuccessMessage('Successfully logged in! Redirecting...');
         setTimeout(() => {
@@ -292,7 +330,14 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialMode = 'l
                         Password
                       </label>
                       {mode === 'login' && (
-                        <a href="#" className="text-xs hover:underline" style={{ color: textSecondary }}>Forgot password?</a>
+                        <button 
+                          type="button" 
+                          onClick={handleForgotPassword} 
+                          className="text-xs hover:underline cursor-pointer transition-colors hover:text-indigo-400" 
+                          style={{ color: textSecondary }}
+                        >
+                          Forgot password?
+                        </button>
                       )}
                     </div>
                     <div className="relative">
