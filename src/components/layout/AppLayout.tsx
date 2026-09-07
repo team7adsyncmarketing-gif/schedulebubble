@@ -63,12 +63,12 @@ const REPULSION_RADIUS = 200;
 const MAX_REPEL        = 72;
 const SPRING_CONFIG    = { stiffness: 180, damping: 22, mass: 1 };
 
-const TrackSystem: React.FC = () => {
-  const trackOpacity    = 0.32;
-  const trackHaloColor  = 'rgba(99,102,241,0.10)';
-  const nodeColor       = '#818CF8';
-  const nodeOpacity     = 0.5;
-  const strokeColor     = '#6366F1';
+const TrackSystem: React.FC<{ isDark: boolean }> = ({ isDark }) => {
+  const trackOpacity    = isDark ? 0.32 : 0.6;
+  const trackHaloColor  = isDark ? 'rgba(99,102,241,0.10)' : 'rgba(255,255,255,0.3)';
+  const nodeColor       = isDark ? '#818CF8' : '#ffffff';
+  const nodeOpacity     = isDark ? 0.5 : 0.9;
+  const strokeColor     = isDark ? '#6366F1' : '#ffffff';
 
   return (
     <svg
@@ -306,16 +306,18 @@ const STARFIELD_PARTICLES = Array.from({ length: 18 }, (_, i) => ({
   color: ['#6366F1', '#818CF8', '#A5B4FC', '#C7D2FE', '#94A3B8'][Math.floor(Math.random() * 5)],
 }));
 
-const DataStarfield: React.FC = () => (
+const DataStarfield: React.FC<{ isDark: boolean }> = ({ isDark }) => (
   <div className="absolute inset-0 pointer-events-none">
-    {STARFIELD_PARTICLES.map(p => (
+    {STARFIELD_PARTICLES.map(p => {
+      const pColor = isDark ? p.color : '#ffffff';
+      return (
       <motion.div
         key={p.id} className="absolute rounded-full"
-        style={{ left: `${p.x}%`, top: `${p.y}%`, width: p.size, height: p.size, background: p.color, boxShadow: `0 0 ${p.size * 4}px ${p.color}55` }}
-        animate={{ opacity: [0, 0.85, 0], scale: [0, 1.4, 0], y: [0, -p.dy] }}
+        style={{ left: `${p.x}%`, top: `${p.y}%`, width: p.size, height: p.size, background: pColor, boxShadow: `0 0 ${p.size * 4}px ${pColor}55` }}
+        animate={{ opacity: [0, isDark ? 0.85 : 1, 0], scale: [0, 1.4, 0], y: [0, -p.dy] }}
         transition={{ duration: p.duration, delay: p.delay, repeat: Infinity, ease: 'easeOut' }}
       />
-    ))}
+    )})}
   </div>
 );
 
@@ -344,10 +346,10 @@ const AnimatedScene: React.FC<{ mouseRef: React.RefObject<MousePosition>; glowRe
       </defs>
       <rect width="100%" height="100%" fill="url(#dotgrid)" />
     </svg>
-    <TrackSystem />
+    <TrackSystem isDark={isDark} />
     <AdsyncLogo />
     <SocialCoins mouseRef={mouseRef} />
-    <DataStarfield />
+    <DataStarfield isDark={isDark} />
     {/* Dark vignette edge — only in dark mode */}
     {isDark && (
       <div
@@ -393,7 +395,10 @@ export const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children })
     const onMove = (e: MouseEvent) => {
       mouseRef.current = { x: e.clientX, y: e.clientY };
       if (glowRef.current) {
-        glowRef.current.style.background = `radial-gradient(circle at ${e.clientX}px ${e.clientY}px, rgba(0,229,255,0.065) 0%, rgba(99,102,241,0.03) 200px, transparent 420px)`;
+        const glowColor = isDark 
+          ? `radial-gradient(circle at ${e.clientX}px ${e.clientY}px, rgba(0,229,255,0.065) 0%, rgba(99,102,241,0.03) 200px, transparent 420px)`
+          : `radial-gradient(circle at ${e.clientX}px ${e.clientY}px, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0.1) 200px, transparent 420px)`;
+        glowRef.current.style.background = glowColor;
         glowRef.current.style.opacity = '1';
       }
     };
@@ -408,7 +413,7 @@ export const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children })
       window.removeEventListener('mousemove', onMove);
       window.removeEventListener('mouseleave', onLeave);
     };
-  }, []);
+  }, [isDark]);
 
   return (
     <ThemeCtx.Provider value={{ isDark, toggleTheme }}>
