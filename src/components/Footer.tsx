@@ -19,7 +19,7 @@ export const Footer: React.FC = () => {
           <div className="bg-indigo-600 p-1.5 rounded-lg shadow-sm">
             <Hexagon className="w-4 h-4 text-white" />
           </div>
-          <span className="font-bold tracking-widest text-lg hidden sm:block">ADSYNC</span>
+          <span className="font-bold tracking-widest text-lg hidden sm:block">ScheduleBubble</span>
         </div>
         
         <div className="text-sm font-medium text-center">
