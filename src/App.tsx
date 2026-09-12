@@ -147,12 +147,7 @@ function App() {
               className="flex items-center gap-3 cursor-pointer group focus:outline-none"
               aria-label="Go to home"
             >
-              <div className="bg-indigo-600 p-2 rounded-xl group-hover:scale-110 group-hover:bg-indigo-500 transition-all duration-300 shadow-[0_0_18px_rgba(79,70,229,0.45)]">
-                <Hexagon className="w-5 h-5 text-white" />
-              </div>
-              <span className="font-bold text-xl tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 via-slate-700 to-slate-500 dark:from-white dark:via-slate-200 dark:to-slate-500 group-hover:to-indigo-500 transition-all duration-300">
-                AdSync Marketing
-              </span>
+              <img src="/logo.png" alt="ScheduleBubble Logo" className="h-8 w-auto bg-white p-1 rounded-md transition-all duration-300" />
             </button>
 
             {/* Right side controls */}

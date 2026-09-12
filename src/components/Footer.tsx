@@ -23,7 +23,7 @@ export const Footer: React.FC = () => {
         </div>
         
         <div className="text-sm font-medium text-center">
-          &copy; 2026 AdSync Marketing. All rights reserved.
+          &copy; 2026 ScheduleBubble. All rights reserved.
         </div>
         
         <div className="flex flex-wrap justify-center items-center gap-4 sm:gap-6 text-sm font-semibold">
