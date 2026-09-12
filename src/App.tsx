@@ -147,7 +147,7 @@ function App() {
               className="flex items-center gap-3 cursor-pointer group focus:outline-none"
               aria-label="Go to home"
             >
-              <img src="/logo.png" alt="ScheduleBubble Logo" className="h-8 w-auto bg-white p-1 rounded-md transition-all duration-300" />
+              <img src="/logo.png" alt="ScheduleBubble Logo" className="h-12 w-auto bg-white p-1.5 rounded-md transition-all duration-300" />
             </button>
 
             {/* Right side controls */}
