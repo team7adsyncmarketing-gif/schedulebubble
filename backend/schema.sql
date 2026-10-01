@@ -89,3 +89,17 @@ CREATE TABLE IF NOT EXISTS media_assets (
   file_name TEXT NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
+-- 7. Leads Table (For CAPI/Lead Quality Sync)
+CREATE TABLE IF NOT EXISTS leads (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  user_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE,
+  name TEXT,
+  email TEXT,
+  phone TEXT,
+  status TEXT DEFAULT 'New', -- 'New', 'Contacted', 'Qualified', 'Junk', 'Closed Deal'
+  fbclid TEXT,
+  gclid TEXT,
+  source TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);

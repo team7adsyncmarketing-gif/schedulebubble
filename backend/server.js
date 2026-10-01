@@ -1,4 +1,4 @@
-import express from 'express';
+﻿import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
@@ -18,17 +18,17 @@ import analyticsRoutes from './routes/analyticsRoutes.js';
 import aiRoutes from './routes/aiRoutes.js';
 import mediaRoutes from './routes/mediaRoutes.js';
 import userRoutes from './routes/userRoutes.js';
+import leadRoutes from './routes/leadRoutes.js';
 import { startPublisherService } from './services/publisherService.js';
 import { startInsightsService } from './services/insightsService.js';
 
 import dns from 'dns';
-dns.setServers(['8.8.8.8', '1.1.1.1']); // Forces Google & Cloudflare public DNS to bypass local network block
+dns.setServers(['8.8.8.8', '1.1.1.1']);
 
 const app = express();
 
 // Allow requests from frontend (Vercel or localhost)
 const allowedOrigins = ['http://localhost:5173', 'https://schedulebubble-two.vercel.app'];
-// Also allow any custom domain by checking if the origin is provided
 app.use(cors({ 
   origin: function (origin, callback) {
     if (!origin || allowedOrigins.includes(origin) || origin.includes('vercel.app')) {
@@ -48,6 +48,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/leads', leadRoutes);
 app.use('/api/oauth', oauthRoutes);
 app.use('/api/posts', postRoutes);
 app.use('/api/analytics', analyticsRoutes);
