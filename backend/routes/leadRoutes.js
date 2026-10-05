@@ -1,6 +1,7 @@
 ﻿import express from 'express';
 import axios from 'axios';
 import crypto from 'crypto';
+import supabase from '../config/supabase.js';
 
 const router = express.Router();
 
@@ -10,7 +11,7 @@ const hashData = (data) => {
   return crypto.createHash('sha256').update(data.trim().toLowerCase()).digest('hex');
 };
 
-// Module 3: The Meta CAPI Sync Engine
+// Module 3: The Meta CAPI Sync Engine (Now Multi-Tenant)
 const sendToMetaCAPI = async (lead) => {
   try {
     if (!lead.fbclid) {
@@ -18,14 +19,23 @@ const sendToMetaCAPI = async (lead) => {
       return false;
     }
 
-    const pixelId = process.env.META_PIXEL_ID;
-    const accessToken = process.env.META_ACCESS_TOKEN;
-    const testCode = process.env.META_TEST_CODE;
+    // NEW: Dynamically fetch the client's unique Meta keys from Supabase profiles table
+    const { data: profile, error } = await supabase
+      .from('profiles')
+      .select('meta_pixel_id, meta_access_token')
+      .eq('id', lead.user_id)
+      .single();
 
-    if (!pixelId || !accessToken) {
-      console.error('[Meta CAPI] Missing META_PIXEL_ID or META_ACCESS_TOKEN in .env');
+    if (error || !profile?.meta_pixel_id || !profile?.meta_access_token) {
+      console.error('[Meta CAPI] Client has not setup Meta Integration yet.');
       return false;
     }
+
+    const pixelId = profile.meta_pixel_id;
+    const accessToken = profile.meta_access_token;
+    
+    // We still keep testCode in .env just for your internal testing, but clients won't use it
+    const testCode = process.env.META_TEST_CODE; 
 
     const eventTime = Math.floor(Date.now() / 1000);
 
@@ -34,9 +44,9 @@ const sendToMetaCAPI = async (lead) => {
         {
           event_name: 'Lead',
           event_time: eventTime,
-          action_source: 'system_generated',
+          action_source: 'website',
           user_data: {
-            fbc: `fb.1.${eventTime}.${lead.fbclid}`,
+            fbc: "fb.1..",
             em: hashData(lead.email),
             ph: hashData(lead.phone),
           },
@@ -47,15 +57,16 @@ const sendToMetaCAPI = async (lead) => {
       ],
     };
 
-    // Add test code only if it exists (for sandbox/test mode)
     if (testCode) {
       payload.test_event_code = testCode;
     }
 
-    const url = `https://graph.facebook.com/v19.0/${pixelId}/events?access_token=${accessToken}`;
+    console.log('[Meta Payload]:', JSON.stringify(payload, null, 2));
+
+    const url = "https://graph.facebook.com/v19.0//events?access_token=";
     const response = await axios.post(url, payload);
 
-    console.log('[Meta CAPI] Successfully sent Qualified Lead event:', response.data);
+    console.log('[Meta CAPI] Successfully sent Qualified Lead event to Client Pixel:', pixelId);
     return true;
   } catch (error) {
     console.error('[Meta CAPI] Error:', error.response?.data || error.message);
@@ -63,51 +74,57 @@ const sendToMetaCAPI = async (lead) => {
   }
 };
 
-// Module 2: Webhook endpoint - triggered when a lead status changes
+// Module 2: Webhook endpoint - triggered when a lead status changes in UI
 // PUT /api/leads/:id/status
 router.put('/:id/status', async (req, res) => {
   try {
     const { id } = req.params;
-    const { status, email, phone, fbclid, gclid } = req.body;
+    const { status } = req.body;
 
-    if (!status) {
-      return res.status(400).json({ error: 'Status is required.' });
-    }
+    if (!status) return res.status(400).json({ error: 'Status is required.' });
 
-    // TODO: Update actual DB record here when Supabase leads table is ready
-    // const { data, error } = await supabase.from('leads').update({ status }).eq('id', id).select().single();
+    // 1. Update status in Supabase
+    const { data: lead, error } = await supabase
+      .from('leads')
+      .update({ status, updated_at: new Date() })
+      .eq('id', id)
+      .select()
+      .single();
 
-    const lead = { id, status, email, phone, fbclid, gclid };
+    if (error || !lead) throw error;
 
-    // Trigger Meta CAPI only for Qualified leads that have fbclid
+    // 2. Trigger Meta CAPI if they marked it as Qualified
+    let metaResult = false;
     if (status === 'Qualified') {
-      const metaResult = await sendToMetaCAPI(lead);
-      return res.status(200).json({
-        message: 'Lead status updated successfully',
-        lead,
-        meta_capi_fired: metaResult,
-      });
+      metaResult = await sendToMetaCAPI(lead);
     }
 
-    res.status(200).json({ message: 'Lead status updated successfully', lead, meta_capi_fired: false });
+    res.status(200).json({ message: 'Lead status updated successfully', lead, meta_capi_fired: metaResult });
   } catch (error) {
     console.error('[Lead Route] Error:', error.message);
     res.status(500).json({ error: error.message });
   }
 });
 
-// Module 1 endpoint: Save a new lead (with fbclid/gclid captured from frontend tracker)
+// Module 1 endpoint: Save a new lead from the client's website form
 // POST /api/leads
 router.post('/', async (req, res) => {
   try {
-    const { name, email, phone, fbclid, gclid, source } = req.body;
+    // Note: client's website form must include their user_id so we know whose lead it is!
+    const { user_id, name, email, phone, fbclid, gclid, source } = req.body;
 
-    // TODO: Insert into Supabase leads table when ready
-    // const { data, error } = await supabase.from('leads').insert([{ name, email, phone, fbclid, gclid, source }]).select().single();
+    if (!user_id) return res.status(400).json({ error: 'user_id is required' });
 
-    const lead = { id: crypto.randomUUID(), name, email, phone, fbclid, gclid, source, status: 'New' };
+    // Insert into Supabase
+    const { data: lead, error } = await supabase
+      .from('leads')
+      .insert([{ user_id, name, email, phone, fbclid, gclid, source, status: 'New' }])
+      .select()
+      .single();
 
-    console.log('[Lead Route] New lead captured:', lead);
+    if (error) throw error;
+
+    console.log('[Lead Route] New live lead captured in DB:', lead.id);
     res.status(201).json({ message: 'Lead saved successfully', lead });
   } catch (error) {
     console.error('[Lead Route] Error saving lead:', error.message);
