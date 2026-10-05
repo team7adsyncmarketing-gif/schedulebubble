@@ -156,6 +156,7 @@ function App() {
                 {/* Nav links */}
                 <div className="hidden md:flex items-center gap-1">
                   <NavPill label="Dashboard" active={activeTab === 'dashboard'} onClick={() => setActiveTab('dashboard')} />
+                  <NavPill label="Leads" active={activeTab === leads} onClick={() => setActiveTab(leads)} />
                   <NavPill label="Queues" active={activeTab === 'queues'} onClick={() => setActiveTab('queues')} />
                   <NavPill label="Analytics" active={activeTab === 'analytics'} onClick={() => setActiveTab('analytics')} />
                 </div>

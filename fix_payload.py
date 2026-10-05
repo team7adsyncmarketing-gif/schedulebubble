@@ -1,12 +1,8 @@
-import re
-
-with open("backend/routes/leadRoutes.js", "r", encoding="utf-8") as f:
+with open('backend/routes/leadRoutes.js', 'r', encoding='utf-8') as f:
     content = f.read()
 
-content = content.replace(
-    "    if (testCode) {\n      payload.test_event_code = testCode;\n    }\n\n    const url",
-    "    if (testCode) {\n      payload.test_event_code = testCode;\n    }\n\n    console.log('[Meta Payload]:', JSON.stringify(payload, null, 2));\n\n    const url"
-)
+content = content.replace('fbc: "fb.1..",', 'fbc: b.1..,')
+content = content.replace('const url = "https://graph.facebook.com/v19.0//events?access_token=";', 'const url = https://graph.facebook.com/v19.0//events?access_token=;')
 
-with open("backend/routes/leadRoutes.js", "w", encoding="utf-8") as f:
+with open('backend/routes/leadRoutes.js', 'w', encoding='utf-8') as f:
     f.write(content)
