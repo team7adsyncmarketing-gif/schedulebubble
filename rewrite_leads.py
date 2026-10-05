@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+content = """import React, { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { Users, CheckCircle2, Search, ArrowUpRight, Phone, Mail, Loader2, Target, Code2, Terminal, X } from 'lucide-react';
 
@@ -281,4 +281,8 @@ const Leads: React.FC = () => {
   );
 };
 
-export default Leads;
+export default Leads;"""
+
+with open('src/pages/Leads.tsx', 'w', encoding='utf-8') as f:
+    f.write(content)
+print("Done")
