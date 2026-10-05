@@ -230,6 +230,7 @@ function App() {
           <div className="md:hidden border-t border-slate-200/60 dark:border-white/[0.06] bg-white/95 dark:bg-[rgba(9,13,22,0.97)] px-4 pb-4 pt-3 animate-in slide-in-from-top-2 duration-200">
             <div className="flex flex-col gap-1">
               <button onClick={() => { setActiveTab('dashboard'); setMobileMenuOpen(false); }} className={`w-full text-left px-4 py-3 rounded-xl text-sm font-medium transition-all ${activeTab === 'dashboard' ? 'bg-indigo-600/10 text-indigo-500 dark:text-indigo-300 border border-indigo-500/20' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'}`}>Dashboard</button>
+              <button onClick={() => { setActiveTab('leads'); setMobileMenuOpen(false); }} className={`w-full text-left px-4 py-3 rounded-xl text-sm font-medium transition-all ${activeTab === 'leads' ? 'bg-indigo-600/10 text-indigo-500 dark:text-indigo-300 border border-indigo-500/20' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'}`}>Leads</button>
               <button onClick={() => { setActiveTab('queues'); setMobileMenuOpen(false); }} className={`w-full text-left px-4 py-3 rounded-xl text-sm font-medium transition-all ${activeTab === 'queues' ? 'bg-indigo-600/10 text-indigo-500 dark:text-indigo-300 border border-indigo-500/20' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'}`}>Queues</button>
               <button onClick={() => { setActiveTab('analytics'); setMobileMenuOpen(false); }} className={`w-full text-left px-4 py-3 rounded-xl text-sm font-medium transition-all ${activeTab === 'analytics' ? 'bg-indigo-600/10 text-indigo-500 dark:text-indigo-300 border border-indigo-500/20' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'}`}>Analytics</button>
               <div className="my-2 h-px bg-slate-200 dark:bg-slate-800" />
@@ -251,6 +252,7 @@ function App() {
         ) : (
           <div className="flex-grow flex flex-col animate-in fade-in slide-in-from-bottom-3 duration-500">
             {activeTab === 'dashboard' && <Dashboard />}
+            {activeTab === 'leads' && <Leads />}
             {activeTab === 'queues' && <Queues />}
             {activeTab === 'analytics' && <Analytics />}
           </div>
