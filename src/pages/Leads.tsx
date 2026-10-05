@@ -26,7 +26,7 @@ const Leads: React.FC = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      const response = await fetch(http://localhost:5000/api/leads?user_id= + user.id);
+      const response = await fetch("http://localhost:5000/api/leads?user_id=" + user.id);
       if (response.ok) {
         const data = await response.json();
         setLeads(data);
@@ -41,7 +41,7 @@ const Leads: React.FC = () => {
   const markAsQualified = async (leadId: string) => {
     setUpdatingId(leadId);
     try {
-      const response = await fetch(http://localhost:5000/api/leads/ + leadId + /status, {
+      const response = await fetch("http://localhost:5000/api/leads/" + leadId + "/status", {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: 'Qualified' }),
