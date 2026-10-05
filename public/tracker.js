@@ -1,7 +1,7 @@
 // ScheduleBubble Lead Tracker
 (function() {
   const SCRIPT_VERSION = '1.0';
-  const SCHEDULEBUBBLE_API_URL = 'https://api.schedulebubble.com'; // Change to your live backend URL
+  const SCHEDULEBUBBLE_API_URL = 'https://schedulebubble.onrender.com'; // Change to your live backend URL
 
   // 1. Capture fbclid from URL
   const urlParams = new URLSearchParams(window.location.search);
