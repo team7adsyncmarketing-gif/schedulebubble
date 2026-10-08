@@ -12,7 +12,7 @@ const hashData = (data) => {
 
 const sendToMetaCAPI = async (lead) => {
   try {
-    if (!lead.fbclid) return false;
+    if (!lead.fbclid && !lead.email && !lead.phone) return false;
 
     const { data: profile, error } = await supabase.from('profiles').select('meta_pixel_id, meta_access_token').eq('id', lead.user_id).single();
 
@@ -29,7 +29,7 @@ const sendToMetaCAPI = async (lead) => {
           event_time: eventTime,
           action_source: 'website',
           user_data: {
-            fbc: 'fb.1.' + eventTime + '.' + lead.fbclid,
+            ...(lead.fbclid ? { fbc: 'fb.1.' + eventTime + '.' + lead.fbclid } : {}),
             em: hashData(lead.email),
             ph: hashData(lead.phone),
           },
