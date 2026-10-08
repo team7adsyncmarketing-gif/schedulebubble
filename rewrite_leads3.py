@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+content = """import React, { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { Users, CheckCircle2, Search, ArrowUpRight, Phone, Mail, Loader2, Target, Code2, Terminal, X, Settings } from 'lucide-react';
 
@@ -23,13 +23,6 @@ const Leads: React.FC = () => {
   const [pixelId, setPixelId] = useState('');
   const [accessToken, setAccessToken] = useState('');
   const [isSavingMeta, setIsSavingMeta] = useState(false);
-
-  // Google Config State
-  const [isGoogleConfigOpen, setIsGoogleConfigOpen] = useState(false);
-  const [googleCustomerId, setGoogleCustomerId] = useState('');
-  const [googleConversionId, setGoogleConversionId] = useState('');
-  const [isSavingGoogle, setIsSavingGoogle] = useState(false);
-
 
   useEffect(() => {
     fetchLeads();
@@ -82,36 +75,6 @@ const Leads: React.FC = () => {
     }
   };
 
-  
-  const openGoogleConfig = async () => {
-    setIsGoogleConfigOpen(true);
-    if (user) {
-       const { data } = await supabase.from('profiles').select('google_customer_id, google_conversion_id').eq('id', user.id).single();
-       if (data) {
-          setGoogleCustomerId(data.google_customer_id || '');
-          setGoogleConversionId(data.google_conversion_id || '');
-       }
-    }
-  };
-
-  const saveGoogleConfig = async () => {
-    if (!user) return;
-    setIsSavingGoogle(true);
-    try {
-      const { error } = await supabase.from('profiles').update({
-        google_customer_id: googleCustomerId,
-        google_conversion_id: googleConversionId
-      }).eq('id', user.id);
-      
-      if (error) throw error;
-      setIsGoogleConfigOpen(false);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setIsSavingGoogle(false);
-    }
-  };
-
   const markAsQualified = async (leadId: string) => {
     setUpdatingId(leadId);
     try {
@@ -156,12 +119,6 @@ const Leads: React.FC = () => {
             className="flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-sm font-medium transition-all shadow-sm shadow-indigo-500/20"
           >
             <Settings className="w-4 h-4" /> Connect Meta CAPI
-          </button>
-          <button 
-            onClick={openGoogleConfig}
-            className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-sm font-medium transition-all shadow-sm shadow-blue-500/20"
-          >
-            <Target className="w-4 h-4" /> Connect Google Ads
           </button>
           <button 
             onClick={() => setIsSetupOpen(true)}
@@ -337,60 +294,6 @@ const Leads: React.FC = () => {
         </div>
       )}
 
-      
-      {/* Google Config Modal */}
-      {isGoogleConfigOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200" onClick={() => setIsGoogleConfigOpen(false)} />
-          <div className="relative bg-white dark:bg-[#0c101a] rounded-3xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto border border-slate-200 dark:border-white/[0.08] animate-in zoom-in-95 duration-200 flex flex-col">
-            <div className="p-6">
-              <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-6">Connect Google Ads</h2>
-              
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Google Ads / GA4 Measurement ID</label>
-                  <input 
-                    type="text" 
-                    value={googleCustomerId}
-                    onChange={(e) => setGoogleCustomerId(e.target.value)}
-                    className="w-full px-4 py-2.5 bg-slate-100 dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.06] rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 dark:text-white"
-                    placeholder="G-XXXXXXXXXX"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">API Secret Key</label>
-                  <input 
-                    type="password" 
-                    value={googleConversionId}
-                    onChange={(e) => setGoogleConversionId(e.target.value)}
-                    className="w-full px-4 py-2.5 bg-slate-100 dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.06] rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 dark:text-white"
-                    placeholder="Secret Key..."
-                  />
-                </div>
-              </div>
-
-              <div className="mt-8 flex justify-end gap-3">
-                <button 
-                  onClick={() => setIsGoogleConfigOpen(false)}
-                  className="px-4 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl font-medium transition-all"
-                >
-                  Cancel
-                </button>
-                <button 
-                  onClick={saveGoogleConfig}
-                  disabled={isSavingGoogle}
-                  className="px-5 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-medium shadow-lg shadow-blue-500/20 transition-all flex items-center gap-2"
-                >
-                  {isSavingGoogle && <Loader2 className="w-4 h-4 animate-spin" />}
-                  Connect
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Setup Instructions Modal */}
       {isSetupOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
@@ -472,4 +375,8 @@ const Leads: React.FC = () => {
   );
 };
 
-export default Leads;
+export default Leads;"""
+
+with open('src/pages/Leads.tsx', 'w', encoding='utf-8') as f:
+    f.write(content)
+print("Done")

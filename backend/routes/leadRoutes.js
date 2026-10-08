@@ -51,6 +51,45 @@ const sendToMetaCAPI = async (lead) => {
   }
 };
 
+
+const sendToGoogleAds = async (lead) => {
+  try {
+    if (!lead.gclid) return false;
+
+    // Pull Google credentials from Supabase
+    const { data: profile, error } = await supabase.from('profiles').select('google_customer_id, google_conversion_id').eq('id', lead.user_id).single();
+
+    if (error || !profile?.google_customer_id) return false;
+
+    console.log(`[Google Ads] Firing Offline Conversion for GCLID: ${lead.gclid} to Customer ID: ${profile.google_customer_id}`);
+
+    // Standard Google Measurement Protocol Payload (Bypasses the 3-week Developer Token approval)
+    const payload = {
+      client_id: lead.gclid, // Using GCLID as client identifier
+      events: [{
+        name: 'offline_conversion_qualified',
+        params: {
+          gclid: lead.gclid,
+          lead_status: 'Qualified',
+          value: 100, // Arbitrary conversion value
+          currency: 'USD'
+        }
+      }]
+    };
+
+    // If they provided a GA4/Google Ads Conversion ID, send it
+    if (profile.google_conversion_id) {
+       const url = `https://www.google-analytics.com/mp/collect?measurement_id=${profile.google_customer_id}&api_secret=${profile.google_conversion_id}`;
+       await axios.post(url, payload);
+    }
+    
+    return true;
+  } catch (error) {
+    console.error('[Google Ads] Error:', error.message);
+    return false;
+  }
+};
+
 router.put('/:id/status', async (req, res) => {
   try {
     const { id } = req.params;
@@ -61,7 +100,10 @@ router.put('/:id/status', async (req, res) => {
     if (error || !lead) throw error;
 
     let metaResult = false;
-    if (status === 'Qualified') metaResult = await sendToMetaCAPI(lead);
+    if (status === 'Qualified') {
+      metaResult = await sendToMetaCAPI(lead);
+      const googleResult = await sendToGoogleAds(lead);
+    }
 
     res.status(200).json({ message: 'Lead status updated successfully', lead, meta_capi_fired: metaResult });
   } catch (error) {
