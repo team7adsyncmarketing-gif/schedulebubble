@@ -287,9 +287,9 @@ const Leads: React.FC = () => {
 
       {/* Meta Config Modal */}
       {isMetaConfigOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[100] flex justify-center p-4 pt-16 sm:pt-24 overflow-y-auto">
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200" onClick={() => setIsMetaConfigOpen(false)} />
-          <div className="relative bg-white dark:bg-[#0c101a] rounded-3xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto border border-slate-200 dark:border-white/[0.08] animate-in zoom-in-95 duration-200 flex flex-col">
+          <div className="relative bg-white dark:bg-[#0c101a] rounded-3xl shadow-2xl w-full max-w-md  border border-slate-200 dark:border-white/[0.08] animate-in zoom-in-95 duration-200 flex flex-col">
             <div className="p-6">
               <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-6">Connect Meta Manually</h2>
               
@@ -341,9 +341,9 @@ const Leads: React.FC = () => {
       
       {/* Google Config Modal */}
       {isGoogleConfigOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[100] flex justify-center p-4 pt-16 sm:pt-24 overflow-y-auto">
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200" onClick={() => setIsGoogleConfigOpen(false)} />
-          <div className="relative bg-white dark:bg-[#0c101a] rounded-3xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto border border-slate-200 dark:border-white/[0.08] animate-in zoom-in-95 duration-200 flex flex-col">
+          <div className="relative bg-white dark:bg-[#0c101a] rounded-3xl shadow-2xl w-full max-w-md  border border-slate-200 dark:border-white/[0.08] animate-in zoom-in-95 duration-200 flex flex-col">
             <div className="p-6">
               <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-6">Connect Google Ads</h2>
               
@@ -394,10 +394,10 @@ const Leads: React.FC = () => {
 
       {/* Setup Instructions Modal */}
       {isSetupOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[100] flex justify-center p-4 pt-16 sm:pt-24 overflow-y-auto">
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200" onClick={() => setIsSetupOpen(false)} />
           
-          <div className="relative bg-white dark:bg-[#0c101a] rounded-3xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden border border-slate-200 dark:border-white/[0.08] animate-in zoom-in-95 duration-200 flex flex-col">
+          <div className="relative bg-white dark:bg-[#0c101a] rounded-3xl shadow-2xl w-full max-w-3xl  border border-slate-200 dark:border-white/[0.08] animate-in zoom-in-95 duration-200 flex flex-col">
             <button 
               onClick={() => setIsSetupOpen(false)} 
               className="absolute top-4 right-4 p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800/50 text-slate-500 transition-colors z-10 bg-white/50 dark:bg-black/50 backdrop-blur-md"
