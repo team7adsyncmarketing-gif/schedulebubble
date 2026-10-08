@@ -18,6 +18,8 @@ const Leads: React.FC = () => {
   const [updatingId, setUpdatingId] = useState<string | null>(null);
     const [isSetupOpen, setIsSetupOpen] = useState(false);
   const [integrationTab, setIntegrationTab] = useState<'website' | 'zapier'>('website');
+  const [toast, setToast] = useState<{show: boolean, message: string, type: 'success' | 'error'}>({show: false, message: '', type: 'success'});
+
   const [user, setUser] = useState<any>(null);
 
   const [isMetaConfigOpen, setIsMetaConfigOpen] = useState(false);
@@ -111,6 +113,12 @@ const Leads: React.FC = () => {
     } finally {
       setIsSavingGoogle(false);
     }
+  };
+
+
+  const showToast = (message: string, type: 'success' | 'error' = 'success') => {
+    setToast({show: true, message, type});
+    setTimeout(() => setToast({show: false, message: '', type: 'success'}), 4000);
   };
 
   const markAsQualified = async (leadId: string) => {
